@@ -21,18 +21,6 @@ static PyObject* factorial(PyObject* self, PyObject* args) {
     return Py_BuildValue("i", result);
 }
 
-static void delete(PyObject* self) {
-    free ((int*)PyCapsule_GetPointer(self, "remove"));
-}
-
-static void py_vector_delete(PyObject* self) {
-    vector_t* vec = (vector_t*)PyCapsule_GetPointer(self, "py_vector_new");
-    printf("vec %p\n",vec);
-    printf("vec->value %p\n",&vec->value);
-    free ((void *)&vec->value);
-    free ((void *)vec);
-}
-
 static PyObject* py_init_engine(PyObject* self, PyObject* args){
     cl_int err;
     cl_uint num_platforms;
@@ -56,6 +44,19 @@ static PyObject* py_stop_engine(PyObject* self, PyObject* args){
 
     Py_RETURN_NONE;
 }
+
+static void delete(PyObject* self) {
+    free ((int*)PyCapsule_GetPointer(self, "remove"));
+}
+
+static void py_vector_delete(PyObject* self) {
+    vector_t* vec = (vector_t*)PyCapsule_GetPointer(self, "py_vector_new");
+    printf("vec %p\n",vec);
+    printf("vec->value %p\n",&vec->value);
+    free ((void *)&vec->value);
+    free ((void *)vec);
+}
+
 
 static PyObject* py_vector_new(PyObject* self, PyObject* args){
     int len;
@@ -85,6 +86,21 @@ static PyObject* py_vector_set(PyObject* self, PyObject* args) {
     return Py_None;
 }
 
+static PyObject* py_vector_get(PyObject* self, PyObject* args) {
+    
+    PyObject* pf = NULL;
+    int n;
+    if(!PyArg_ParseTuple(args, "Oi:py_vector_set", &pf, &n)) return NULL;
+
+    printf("print %d\n",n);
+    printf("pf %p\n",pf);
+    vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
+    printf("vec %p\n",vec);
+    printf("%lf\n",vec->value.f[n]);
+    PyObject * result = PyFloat_FromDouble((double)vec->value.f[n]);
+    return result;
+}
+
 static PyObject* py_move_vector_device(PyObject* self, PyObject* args) {
     
     PyObject* pf = NULL;
@@ -96,6 +112,48 @@ static PyObject* py_move_vector_device(PyObject* self, PyObject* args) {
     printf("vec %p\n",vec);
     vecreqdev(vec);
     return Py_None;
+}
+
+static PyObject* py_move_vector_host(PyObject* self, PyObject* args) {
+    
+    PyObject* pf = NULL;
+    if(!PyArg_ParseTuple(args, "O:py_move_vector_device", &pf)) return NULL;
+
+    printf("pf %p\n",pf);
+    
+    vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
+    printf("vec %p\n",vec);
+    int n = (vec->type==T_FLOAT?vec->len:2*vec->len);
+    vector_t * out = vector_new(vec->len, vec->type);
+    cl_int status = clEnqueueReadBuffer(clinfo.q, vec->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
+    CLERR
+    PyObject* po = PyCapsule_New((void*)out, "py_vector_new", py_vector_delete);
+    return po;
+}
+
+static PyObject* py_vec_add(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    PyObject* b = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_vec_add", &a, &b)) return NULL;
+
+    printf("a %p\n",a);
+    printf("b %p\n",b);
+    
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+        printf("vec_a %p\n",vec_a);
+    vector_t * vec_b = (vector_t *)PyCapsule_GetPointer(b, "py_vector_new");
+        printf("vec_b %p\n",vec_b);
+
+    
+    //TODO completar o vec_add
+    object_t ** in = convertToObject(vec_a,vec_b);
+    
+    vector_t * r = (vector_t *) vec_add((void **) in, NULL );
+    
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
 }
 
 static PyObject* create(PyObject* self, PyObject* args) {
@@ -135,7 +193,10 @@ static PyMethodDef mainMethods[] = {
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
     {"vector_new", py_vector_new, METH_VARARGS, "vector_new"},
     {"vector_set", py_vector_set, METH_VARARGS, "vector_set"},
+    {"vector_get", py_vector_get, METH_VARARGS, "vector_get"},
     {"move_vector_device", py_move_vector_device, METH_VARARGS, "move_vector_device"},
+    {"move_vector_host", py_move_vector_host, METH_VARARGS, "move_vector_host"},
+    {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
     {NULL, NULL, 0, NULL}
 };
 
