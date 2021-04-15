@@ -53,4 +53,6 @@ for i in range(n):
     for j in range(n):
         print(matrix_get(mat_f,i,j))
 
+smat_f = sparse_matrix_new(n,n, 2) # 2 -> float
+
 stop_engine()
