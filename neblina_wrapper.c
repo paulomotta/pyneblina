@@ -264,6 +264,33 @@ static PyObject* py_sparse_matrix_new(PyObject* self, PyObject* args){
     return po;
 }
 
+static PyObject* py_sparse_matrix_set_real(PyObject* self, PyObject* args) {
+    
+    PyObject* pf = NULL;
+    int i;
+    int j;
+    double value;
+    if(!PyArg_ParseTuple(args, "Oiid:py_sparse_matrix_set", &pf, &i, &j, &value)) return NULL;
+
+    printf("print (%d,%d)\n",i,j);
+    printf("pf %p\n",pf);
+    smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
+    printf("smat %p\n",mat);
+    smatrix_set_real_value(mat,i,j,value);
+    return Py_None;
+}
+
+static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
+    
+    PyObject* pf = NULL;
+    if(!PyArg_ParseTuple(args, "O:py_sparse_matrix_set", &pf)) return NULL;
+
+    printf("pf %p\n",pf);
+    smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
+    smatrix_pack(mat);
+    return Py_None;
+}
+
 static PyObject* create(PyObject* self, PyObject* args) {
     int n;
     if (!PyArg_ParseTuple(args, "i", &n))
@@ -310,6 +337,8 @@ static PyMethodDef mainMethods[] = {
     {"move_matrix_device", py_move_matrix_device, METH_VARARGS, "move_matrix_device"},
     {"move_matrix_host", py_move_matrix_host, METH_VARARGS, "move_matrix_host"},
     {"sparse_matrix_new", py_sparse_matrix_new, METH_VARARGS, "sparse_matrix_new"},
+    {"sparse_matrix_set_real", py_sparse_matrix_set_real, METH_VARARGS, "sparse_matrix_set_real"},
+    {"sparse_matrix_pack", py_sparse_matrix_pack, METH_VARARGS, "sparse_matrix_pack"},
     {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
     {NULL, NULL, 0, NULL}
 };

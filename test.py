@@ -55,4 +55,24 @@ for i in range(n):
 
 smat_f = sparse_matrix_new(n,n, 2) # 2 -> float
 
+n = 10
+
+sparse_matrix_set_real(smat_f, 0, 0, 3.);
+sparse_matrix_set_real(smat_f, 0, 1, 3.);
+sparse_matrix_set_real(smat_f, 0, 9, 3.);
+
+sparse_matrix_set_real(smat_f, 1, 1, 3.);
+sparse_matrix_set_real(smat_f, 1, 5, 3.);
+sparse_matrix_set_real(smat_f, 1, 8, 3.);
+
+sparse_matrix_set_real(smat_f, 2, 2, 3.);
+sparse_matrix_set_real(smat_f, 2, 4, 3.);
+sparse_matrix_set_real(smat_f, 2, 7, 3.);
+
+sparse_matrix_set_real(smat_f, 3, 3, 3.);
+sparse_matrix_set_real(smat_f, 3, 1, 3.);
+sparse_matrix_set_real(smat_f, 3, 6, 3.);
+
+sparse_matrix_pack(smat_f)
+
 stop_engine()
