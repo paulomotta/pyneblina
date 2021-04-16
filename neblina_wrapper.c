@@ -156,6 +156,35 @@ static PyObject* py_vec_add(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_matvec_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    PyObject* b = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_matvec_mul", &a, &b)) return NULL;
+
+    printf("a %p\n",a);
+    printf("b %p\n",b);
+    
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+        printf("vec_a %p\n",vec_a);
+    matrix_t * mat_b = (matrix_t *)PyCapsule_GetPointer(b, "py_matrix_new");
+        printf("mat_b %p\n",mat_b);
+
+    
+    object_t ** in = convertToObject3(vec_a, mat_b);
+    
+    vector_t * r = (vector_t *) matvec_mul3((void **) in, NULL );
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
+
+//vec_add_off
+//vec_sum
+//vec_conj
+//vec_prod
+//
+
 static void py_matrix_delete(PyObject* self) {
     matrix_t* mat = (matrix_t*)PyCapsule_GetPointer(self, "py_matrix_new");
     printf("mat %p\n",mat);
@@ -340,6 +369,7 @@ static PyMethodDef mainMethods[] = {
     {"sparse_matrix_set_real", py_sparse_matrix_set_real, METH_VARARGS, "sparse_matrix_set_real"},
     {"sparse_matrix_pack", py_sparse_matrix_pack, METH_VARARGS, "sparse_matrix_pack"},
     {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
+    {"matvec_mul", py_matvec_mul, METH_VARARGS, "matvec_mul"},
     {NULL, NULL, 0, NULL}
 };
 

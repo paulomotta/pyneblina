@@ -53,9 +53,8 @@ for i in range(n):
     for j in range(n):
         print(matrix_get(mat_f,i,j))
 
-smat_f = sparse_matrix_new(n,n, 2) # 2 -> float
-
 n = 10
+smat_f = sparse_matrix_new(n,n, 2) # 2 -> float
 
 sparse_matrix_set_real(smat_f, 0, 0, 3.);
 sparse_matrix_set_real(smat_f, 0, 1, 3.);
@@ -74,5 +73,12 @@ sparse_matrix_set_real(smat_f, 3, 1, 3.);
 sparse_matrix_set_real(smat_f, 3, 6, 3.);
 
 sparse_matrix_pack(smat_f)
+
+vec_res = matvec_mul(vec_f,mat_f)
+
+out = move_vector_host(vec_res)
+n=3
+for i in range(n):
+    print(vector_get(out,i))
 
 stop_engine()
