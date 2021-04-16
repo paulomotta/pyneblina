@@ -81,4 +81,28 @@ n=3
 for i in range(n):
     print(vector_get(out,i))
 
+
+n = 3;
+v1 = vector_new(n, 2) # 2 -> float
+v2 = vector_new(n, 2)
+
+vector_set(v1,0,1.0)
+vector_set(v1,1,1.0)
+vector_set(v1,2,1.0)
+
+vector_set(v2,0,1.0)
+vector_set(v2,1,1.0)
+vector_set(v2,2,1.0)
+
+move_vector_device(v1)
+move_vector_device(v2)
+
+
+vec_res = vec_prod(v1,v2)
+
+out = move_vector_host(vec_res)
+n=3
+for i in range(n):
+    print(vector_get(out,i))
+
 stop_engine()

@@ -51,8 +51,8 @@ static void delete(PyObject* self) {
 
 static void py_vector_delete(PyObject* self) {
     vector_t* vec = (vector_t*)PyCapsule_GetPointer(self, "py_vector_new");
-    printf("vec %p\n",vec);
-    printf("vec->value %p\n",&(vec->value));
+    //printf("vec %p\n",vec);
+    //printf("vec->value %p\n",&(vec->value));
 //    free ((void *)&(vec->value));
     free ((void *)vec);
 }
@@ -62,11 +62,11 @@ static PyObject* py_vector_new(PyObject* self, PyObject* args){
     int len;
     int data_type;
     if (!PyArg_ParseTuple(args, "ii", &len,&data_type)) return NULL;
-    printf("create %d\n",len);
+    //printf("create %d\n",len);
     vector_t * a = vector_new(len, data_type);
-    printf("malloc %p\n",a);
+    //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_vector_new", py_vector_delete);
-    printf("capsule_new %p\n",po);
+    //printf("capsule_new %p\n",po);
     return po;
 }
 
@@ -77,12 +77,12 @@ static PyObject* py_vector_set(PyObject* self, PyObject* args) {
     double value;
     if(!PyArg_ParseTuple(args, "Oid:py_vector_set", &pf, &n, &value)) return NULL;
 
-    printf("print %d\n",n);
-    printf("pf %p\n",pf);
+    //printf("print %d\n",n);
+    //printf("pf %p\n",pf);
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
-    printf("vec %p\n",vec);
+    //printf("vec %p\n",vec);
     vec->value.f[n] = value;
-    printf("%lf\n",vec->value.f[n]);
+    //printf("%lf\n",vec->value.f[n]);
     return Py_None;
 }
 
@@ -92,11 +92,11 @@ static PyObject* py_vector_get(PyObject* self, PyObject* args) {
     int n;
     if(!PyArg_ParseTuple(args, "Oi:py_vector_set", &pf, &n)) return NULL;
 
-    printf("print %d\n",n);
-    printf("pf %p\n",pf);
+    //printf("print %d\n",n);
+    //printf("pf %p\n",pf);
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
-    printf("vec %p\n",vec);
-    printf("%lf\n",vec->value.f[n]);
+    //printf("vec %p\n",vec);
+    //printf("%lf\n",vec->value.f[n]);
     PyObject * result = PyFloat_FromDouble((double)vec->value.f[n]);
     return result;
 }
@@ -106,10 +106,10 @@ static PyObject* py_move_vector_device(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     if(!PyArg_ParseTuple(args, "O:py_move_vector_device", &pf)) return NULL;
 
-    printf("pf %p\n",pf);
+    //printf("pf %p\n",pf);
     
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
-    printf("vec %p\n",vec);
+    //printf("vec %p\n",vec);
     vecreqdev(vec);
     return Py_None;
 }
@@ -119,10 +119,10 @@ static PyObject* py_move_vector_host(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     if(!PyArg_ParseTuple(args, "O:py_move_vector_device", &pf)) return NULL;
 
-    printf("pf %p\n",pf);
+    //printf("pf %p\n",pf);
     
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
-    printf("vec %p\n",vec);
+    //printf("vec %p\n",vec);
     int n = (vec->type==T_FLOAT?vec->len:2*vec->len);
     vector_t * out = vector_new(vec->len, vec->type);
     cl_int status = clEnqueueReadBuffer(clinfo.q, vec->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
@@ -137,13 +137,13 @@ static PyObject* py_vec_add(PyObject* self, PyObject* args) {
     PyObject* b = NULL;
     if(!PyArg_ParseTuple(args, "OO:py_vec_add", &a, &b)) return NULL;
 
-    printf("a %p\n",a);
-    printf("b %p\n",b);
+    //printf("a %p\n",a);
+    //printf("b %p\n",b);
     
     vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
-        printf("vec_a %p\n",vec_a);
+        //printf("vec_a %p\n",vec_a);
     vector_t * vec_b = (vector_t *)PyCapsule_GetPointer(b, "py_vector_new");
-        printf("vec_b %p\n",vec_b);
+        //printf("vec_b %p\n",vec_b);
 
     
     //TODO completar o vec_add
@@ -162,13 +162,13 @@ static PyObject* py_matvec_mul(PyObject* self, PyObject* args) {
     PyObject* b = NULL;
     if(!PyArg_ParseTuple(args, "OO:py_matvec_mul", &a, &b)) return NULL;
 
-    printf("a %p\n",a);
-    printf("b %p\n",b);
+    //printf("a %p\n",a);
+    //printf("b %p\n",b);
     
     vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
-        printf("vec_a %p\n",vec_a);
+        //printf("vec_a %p\n",vec_a);
     matrix_t * mat_b = (matrix_t *)PyCapsule_GetPointer(b, "py_matrix_new");
-        printf("mat_b %p\n",mat_b);
+        //printf("mat_b %p\n",mat_b);
 
     
     object_t ** in = convertToObject3(vec_a, mat_b);
@@ -179,16 +179,42 @@ static PyObject* py_matvec_mul(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_vec_prod(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    PyObject* b = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_vec_add", &a, &b)) return NULL;
+
+    //printf("a %p\n",a);
+    //printf("b %p\n",b);
+    
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+        //printf("vec_a %p\n",vec_a);
+    vector_t * vec_b = (vector_t *)PyCapsule_GetPointer(b, "py_vector_new");
+        //printf("vec_b %p\n",vec_b);
+
+    
+    object_t ** in = convertToObject(vec_a,vec_b);
+    
+    vector_t * r = (vector_t *) vec_prod((void **) in, NULL );
+    
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
+
+
+
+
 //vec_add_off
 //vec_sum
 //vec_conj
-//vec_prod
 //
 
 static void py_matrix_delete(PyObject* self) {
     matrix_t* mat = (matrix_t*)PyCapsule_GetPointer(self, "py_matrix_new");
-    printf("mat %p\n",mat);
-    printf("mat->value %p\n",&(mat->value));
+    //printf("mat %p\n",mat);
+    //printf("mat->value %p\n",&(mat->value));
 //    free ((void *)&(mat->value));
     free ((void *)mat);
 }
@@ -199,12 +225,12 @@ static PyObject* py_matrix_new(PyObject* self, PyObject* args){
     int cols;
     int data_type;
     if (!PyArg_ParseTuple(args, "iii", &rows,&cols,&data_type)) return NULL;
-    printf("create %d\n",rows);
-    printf("create %d\n",cols);
+    //printf("create %d\n",rows);
+    //printf("create %d\n",cols);
     matrix_t * a = matrix_new(rows, cols, data_type);
-    printf("malloc %p\n",a);
+    //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_matrix_new", py_matrix_delete);
-    printf("capsule_new %p\n",po);
+    //printf("capsule_new %p\n",po);
     return po;
 }
 
@@ -216,12 +242,12 @@ static PyObject* py_matrix_set(PyObject* self, PyObject* args) {
     double value;
     if(!PyArg_ParseTuple(args, "Oiid:py_matrix_set", &pf, &i, &j, &value)) return NULL;
 
-    printf("print (%d,%d)\n",i,j);
-    printf("pf %p\n",pf);
+    //printf("print (%d,%d)\n",i,j);
+    //printf("pf %p\n",pf);
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
-    printf("mat %p\n",mat);
+    //printf("mat %p\n",mat);
     mat->value.f[i*mat->ncol + j] = value;
-    printf("%lf\n",mat->value.f[i*mat->ncol + j]);
+    //printf("%lf\n",mat->value.f[i*mat->ncol + j]);
     return Py_None;
 }
 
@@ -232,11 +258,11 @@ static PyObject* py_matrix_get(PyObject* self, PyObject* args) {
     int j;
     if(!PyArg_ParseTuple(args, "Oii:py_matrix_set", &pf, &i, &j)) return NULL;
 
-    printf("print (%d,%d)\n",i,j);
-    printf("pf %p\n",pf);
+    //printf("print (%d,%d)\n",i,j);
+    //printf("pf %p\n",pf);
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
-    printf("mat %p\n",mat);
-    printf("%lf\n",mat->value.f[i*mat->ncol + j]);
+    //printf("mat %p\n",mat);
+    //printf("%lf\n",mat->value.f[i*mat->ncol + j]);
     PyObject * result = PyFloat_FromDouble((double)mat->value.f[i*mat->ncol + j]);
     return result;
 }
@@ -247,10 +273,10 @@ static PyObject* py_move_matrix_device(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     if(!PyArg_ParseTuple(args, "O:py_move_matrix_device", &pf)) return NULL;
 
-    printf("pf %p\n",pf);
+    //printf("pf %p\n",pf);
     
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
-    printf("mat %p\n",mat);
+    //printf("mat %p\n",mat);
     matreqdev(mat);
     return Py_None;
 }
@@ -260,10 +286,10 @@ static PyObject* py_move_matrix_host(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     if(!PyArg_ParseTuple(args, "O:py_move_matrix_device", &pf)) return NULL;
 
-    printf("pf %p\n",pf);
+    //printf("pf %p\n",pf);
     
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
-    printf("mat %p\n",mat);
+    //printf("mat %p\n",mat);
     int n = (mat->type==T_FLOAT?mat->nrow*mat->ncol:2*mat->nrow*mat->ncol);
     matrix_t * out = matrix_new(mat->nrow, mat->ncol, mat->type);
     cl_int status = clEnqueueReadBuffer(clinfo.q, mat->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
@@ -274,7 +300,7 @@ static PyObject* py_move_matrix_host(PyObject* self, PyObject* args) {
 
 static void py_sparse_matrix_delete(PyObject* self) {
     smatrix_t* mat = (smatrix_t*)PyCapsule_GetPointer(self, "py_sparse_matrix_new");
-    printf("smat %p\n",mat);
+    //printf("smat %p\n",mat);
     free ((void *)mat);
 }
 
@@ -284,12 +310,12 @@ static PyObject* py_sparse_matrix_new(PyObject* self, PyObject* args){
     int cols;
     int data_type;
     if (!PyArg_ParseTuple(args, "iii", &rows,&cols,&data_type)) return NULL;
-    printf("create %d\n",rows);
-    printf("create %d\n",cols);
+    //printf("create %d\n",rows);
+    //printf("create %d\n",cols);
     smatrix_t * a = smatrix_new(rows, cols, data_type);
-    printf("malloc %p\n",a);
+    //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_sparse_matrix_new", py_sparse_matrix_delete);
-    printf("capsule_new %p\n",po);
+    //printf("capsule_new %p\n",po);
     return po;
 }
 
@@ -301,10 +327,10 @@ static PyObject* py_sparse_matrix_set_real(PyObject* self, PyObject* args) {
     double value;
     if(!PyArg_ParseTuple(args, "Oiid:py_sparse_matrix_set", &pf, &i, &j, &value)) return NULL;
 
-    printf("print (%d,%d)\n",i,j);
-    printf("pf %p\n",pf);
+    //printf("print (%d,%d)\n",i,j);
+    //printf("pf %p\n",pf);
     smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
-    printf("smat %p\n",mat);
+    //printf("smat %p\n",mat);
     smatrix_set_real_value(mat,i,j,value);
     return Py_None;
 }
@@ -314,7 +340,7 @@ static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     if(!PyArg_ParseTuple(args, "O:py_sparse_matrix_set", &pf)) return NULL;
 
-    printf("pf %p\n",pf);
+    //printf("pf %p\n",pf);
     smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
     smatrix_pack(mat);
     return Py_None;
@@ -324,9 +350,9 @@ static PyObject* create(PyObject* self, PyObject* args) {
     int n;
     if (!PyArg_ParseTuple(args, "i", &n))
         return NULL;
-    printf("create %d\n",n);
+    //printf("create %d\n",n);
     int * vec = (int *)malloc(n*sizeof(int));
-    printf("malloc %p\n",vec);
+    //printf("malloc %p\n",vec);
     vec[2]=42; 
     return PyCapsule_New((void*)vec, "create", delete);
 }
@@ -338,12 +364,12 @@ static PyObject* print(PyObject* self, PyObject* args) {
     //if(!PyArg_UnpackTuple(args, "print", 1, 2, &pf,&n)) return NULL;
     if(!PyArg_ParseTuple(args, "Oi:print", &pf, &n)) return NULL;
 
-    printf("print %d\n",n);
-    printf("pf %p\n",pf);
+    //printf("print %d\n",n);
+    //printf("pf %p\n",pf);
     int* vec = (int *)PyCapsule_GetPointer(pf, "create");
-    printf("vec %p\n",vec);
+    //printf("vec %p\n",vec);
     
-    printf("%d\n",vec[n]);
+   printf("%d\n",vec[n]);
     return Py_None;
 }
 
@@ -370,6 +396,7 @@ static PyMethodDef mainMethods[] = {
     {"sparse_matrix_pack", py_sparse_matrix_pack, METH_VARARGS, "sparse_matrix_pack"},
     {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
     {"matvec_mul", py_matvec_mul, METH_VARARGS, "matvec_mul"},
+    {"vec_prod", py_vec_prod, METH_VARARGS, "vec_prod"},
     {NULL, NULL, 0, NULL}
 };
 
