@@ -235,8 +235,21 @@ static PyObject* py_vec_sum(PyObject* self, PyObject* args) {
     return result;
 }
 
+static PyObject* py_vec_conj(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    if(!PyArg_ParseTuple(args, "O:py_vec_sum", &a)) return NULL;
 
-//vec_conj
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+    
+    object_t ** in = convertToObject(vec_a, NULL);
+    
+    vector_t * r = (vector_t *) vec_conj((void **) in, NULL );
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
+
 //
 
 static void py_matrix_delete(PyObject* self) {
@@ -427,6 +440,7 @@ static PyMethodDef mainMethods[] = {
     {"vec_prod", py_vec_prod, METH_VARARGS, "vec_prod"},
     {"vec_add_off", py_vec_add_off, METH_VARARGS, "vec_add_off"},
     {"vec_sum", py_vec_sum, METH_VARARGS, "vec_sum"},
+    {"vec_conj", py_vec_conj, METH_VARARGS, "vec_conj"},
     {NULL, NULL, 0, NULL}
 };
 

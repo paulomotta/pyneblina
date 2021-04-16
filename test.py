@@ -137,4 +137,17 @@ res = vec_sum(v1)
 
 print (res)
 
+n = 3;
+v1 = vector_new(n, 13) # 13 -> complex
+
+vector_set(v1,0, 2.0, 2.0)
+vector_set(v1,1, 2.0, 2.0)
+vector_set(v1,2, 2.0, 2.0)
+    
+res = vec_conj(v1);
+
+#TODO completar o get/set para complexos
+for i in range(offset):
+    print(vector_get(out,i))
+
 stop_engine()
