@@ -105,4 +105,21 @@ n=3
 for i in range(n):
     print(vector_get(out,i))
 
+n = 4;
+v1 = vector_new(n, 2) # 2 -> float
+
+vector_set(v1,0,2.0)
+vector_set(v1,1,2.0)
+vector_set(v1,2,2.0)
+vector_set(v1,3,2.0)
+
+move_vector_device(v1)
+
+offset=2
+vec_res = vec_add_off(offset, v1)
+
+out = move_vector_host(vec_res)
+
+for i in range(offset):
+    print(vector_get(out,i))
 stop_engine()

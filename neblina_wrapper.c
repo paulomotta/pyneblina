@@ -203,10 +203,24 @@ static PyObject* py_vec_prod(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_vec_add_off(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    int offset;
+    if(!PyArg_ParseTuple(args, "iO:py_vec_add", &offset, &a)) return NULL;
+
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+
+    object_t ** in = convertToObject2(offset, vec_a);
+    
+    vector_t * r = (vector_t *) vec_add_off((void **) in, NULL );   
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
 
 
-
-//vec_add_off
+//
 //vec_sum
 //vec_conj
 //
@@ -397,6 +411,7 @@ static PyMethodDef mainMethods[] = {
     {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
     {"matvec_mul", py_matvec_mul, METH_VARARGS, "matvec_mul"},
     {"vec_prod", py_vec_prod, METH_VARARGS, "vec_prod"},
+    {"vec_add_off", py_vec_add_off, METH_VARARGS, "vec_add_off"},
     {NULL, NULL, 0, NULL}
 };
 
