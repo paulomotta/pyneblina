@@ -122,4 +122,19 @@ out = move_vector_host(vec_res)
 
 for i in range(offset):
     print(vector_get(out,i))
+
+n = 4;
+v1 = vector_new(n, 2) # 2 -> float
+
+vector_set(v1,0,2.0)
+vector_set(v1,1,2.0)
+vector_set(v1,2,2.0)
+vector_set(v1,3,2.0)
+
+move_vector_device(v1)
+
+res = vec_sum(v1)
+
+print (res)
+
 stop_engine()

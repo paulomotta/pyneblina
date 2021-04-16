@@ -207,7 +207,7 @@ static PyObject* py_vec_add_off(PyObject* self, PyObject* args) {
     
     PyObject* a = NULL;
     int offset;
-    if(!PyArg_ParseTuple(args, "iO:py_vec_add", &offset, &a)) return NULL;
+    if(!PyArg_ParseTuple(args, "iO:py_vec_add_off", &offset, &a)) return NULL;
 
     vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
 
@@ -219,9 +219,23 @@ static PyObject* py_vec_add_off(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_vec_sum(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    if(!PyArg_ParseTuple(args, "O:py_vec_sum", &a)) return NULL;
 
-//
-//vec_sum
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+    
+    object_t ** in = convertToObject(vec_a, NULL);
+    
+    object_t * r = (object_t *) vec_sum((void **) in, NULL );
+
+    PyObject * result = PyFloat_FromDouble((double)r->value.f);
+    
+    return result;
+}
+
+
 //vec_conj
 //
 
@@ -412,6 +426,7 @@ static PyMethodDef mainMethods[] = {
     {"matvec_mul", py_matvec_mul, METH_VARARGS, "matvec_mul"},
     {"vec_prod", py_vec_prod, METH_VARARGS, "vec_prod"},
     {"vec_add_off", py_vec_add_off, METH_VARARGS, "vec_add_off"},
+    {"vec_sum", py_vec_sum, METH_VARARGS, "vec_sum"},
     {NULL, NULL, 0, NULL}
 };
 
