@@ -60,9 +60,11 @@ static PyObject* py_vector_set(PyObject* self, PyObject* args) {
     //printf("pf %p\n",pf);
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
     //printf("vec %p\n",vec);
-    vec->value.f[n] = real;
     if (vec->type == T_COMPLEX) {
-        vec->value.f[n+1] = imag;
+        vec->value.f[2*n] = real;
+        vec->value.f[2*n+1] = imag;
+    } else {
+        vec->value.f[n] = real;
     }
     //printf("%lf\n",vec->value.f[n]);
     return Py_None;
@@ -293,9 +295,12 @@ static PyObject* py_matrix_set(PyObject* self, PyObject* args) {
     //printf("pf %p\n",pf);
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
     //printf("mat %p\n",mat);
-    mat->value.f[i*mat->ncol + j] = real;
+    int idx = (i*mat->ncol + j);
     if (mat->type == T_COMPLEX) {
-        mat->value.f[i*mat->ncol + j + 1] = imag;
+        mat->value.f[2 * idx] = real;
+        mat->value.f[2 * idx + 1] = imag;
+    } else {
+        mat->value.f[idx] = real;
     }
     //printf("%lf\n",mat->value.f[i*mat->ncol + j]);
     return Py_None;

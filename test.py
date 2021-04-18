@@ -113,7 +113,7 @@ def test_vec_conjugate():
 
     out = move_vector_host(res)
 
-    for i in range(n * 2):
+    for i in range(n):
         print(vector_get(out, 2 * i))
         print(vector_get(out, 2 * i + 1))
 
