@@ -1,9 +1,9 @@
 from distutils.core import setup, Extension
-factorial_module = Extension('cmath',
+neblina_module = Extension('neblina',
                         define_macros = [('MAJOR_VERSION', '0'),
-                                         ('MINOR_VERSION', '1')],
+                                         ('MINOR_VERSION', '2')],
                         include_dirs = ['/home/paulo/Documentos/pesquisa/quantum/neblina-core/include'],
                         libraries = ['neblina-core'],
                         library_dirs = ['/home/paulo/Documentos/pesquisa/quantum/neblina-core'],
                         sources = ['neblina_wrapper.c'])
-setup(name = 'MathExtension',version='1.0',description = 'This is a math package',ext_modules = [factorial_module])
+setup(name = 'NeblinaExtension',version='0.2',description = 'This is the neblina math package',ext_modules = [neblina_module])

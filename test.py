@@ -1,13 +1,5 @@
-from cmath import factorial
-from cmath import create
-from cmath import prin
-from cmath import *
+from neblina import *
 
-#print(factorial(6))
-
-#vec = create(5);
-#print(vec)
-#prin(vec,2);
 
 init_engine()
 

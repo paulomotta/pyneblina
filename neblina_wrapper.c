@@ -3,24 +3,6 @@
 #include "neblina_std.h"
 #include "libneblina.h"
 
-int fastfactorial(int n) {
-    if (n <= 1)
-        return 1;
-    else
-        return n * fastfactorial(n - 1);
-}
-
-static PyObject* factorial(PyObject* self, PyObject* args) {
-    int n;
-    if (!PyArg_ParseTuple(args, "i", &n))
-        return NULL;
-    int result = fastfactorial(n);
-    
-    // https://docs.python.org/3/c-api/capsule.html
-    // 
-    return Py_BuildValue("i", result);
-}
-
 static PyObject* py_init_engine(PyObject* self, PyObject* args){
     cl_int err;
     cl_uint num_platforms;
@@ -43,10 +25,6 @@ static PyObject* py_stop_engine(PyObject* self, PyObject* args){
     ReleaseCLInfo(clinfo);
 
     Py_RETURN_NONE;
-}
-
-static void delete(PyObject* self) {
-    free ((int*)PyCapsule_GetPointer(self, "remove"));
 }
 
 static void py_vector_delete(PyObject* self) {
@@ -387,39 +365,7 @@ static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
     return Py_None;
 }
 
-static PyObject* create(PyObject* self, PyObject* args) {
-    int n;
-    if (!PyArg_ParseTuple(args, "i", &n))
-        return NULL;
-    //printf("create %d\n",n);
-    int * vec = (int *)malloc(n*sizeof(int));
-    //printf("malloc %p\n",vec);
-    vec[2]=42; 
-    return PyCapsule_New((void*)vec, "create", delete);
-}
-
-static PyObject* print(PyObject* self, PyObject* args) {
-    
-    PyObject* pf = NULL;
-    int n;
-    //if(!PyArg_UnpackTuple(args, "print", 1, 2, &pf,&n)) return NULL;
-    if(!PyArg_ParseTuple(args, "Oi:print", &pf, &n)) return NULL;
-
-    //printf("print %d\n",n);
-    //printf("pf %p\n",pf);
-    int* vec = (int *)PyCapsule_GetPointer(pf, "create");
-    //printf("vec %p\n",vec);
-    
-   printf("%d\n",vec[n]);
-    return Py_None;
-}
-
-
-
 static PyMethodDef mainMethods[] = {
-    {"factorial", factorial, METH_VARARGS, "Calculate the factorial of n"},
-    {"create", create, METH_VARARGS, "create"},
-    {"prin", print, METH_VARARGS, "print"},
     {"init_engine", py_init_engine, METH_VARARGS, "init_engine"},
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
     {"vector_new", py_vector_new, METH_VARARGS, "vector_new"},
@@ -444,15 +390,15 @@ static PyMethodDef mainMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-static PyModuleDef cmath = {
+static PyModuleDef neblina = {
     PyModuleDef_HEAD_INIT,
-    "cmath", "Factorial Calculation",
+    "neblina", "Neblina Core",
     -1,
     mainMethods
 };
 
-PyMODINIT_FUNC PyInit_cmath(void) {
-    return PyModule_Create(&cmath);
+PyMODINIT_FUNC PyInit_neblina(void) {
+    return PyModule_Create(&neblina);
 }
 
 
