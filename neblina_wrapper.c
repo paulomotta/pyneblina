@@ -52,14 +52,18 @@ static PyObject* py_vector_set(PyObject* self, PyObject* args) {
     
     PyObject* pf = NULL;
     int n;
-    double value;
-    if(!PyArg_ParseTuple(args, "Oid:py_vector_set", &pf, &n, &value)) return NULL;
+    double real;
+    double imag;
+    if(!PyArg_ParseTuple(args, "Oidd:py_vector_set", &pf, &n, &real, &imag)) return NULL;
 
     //printf("print %d\n",n);
     //printf("pf %p\n",pf);
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
     //printf("vec %p\n",vec);
-    vec->value.f[n] = value;
+    vec->value.f[n] = real;
+    if (vec->type == T_COMPLEX) {
+        vec->value.f[n+1] = imag;
+    }
     //printf("%lf\n",vec->value.f[n]);
     return Py_None;
 }
@@ -281,14 +285,18 @@ static PyObject* py_matrix_set(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     int i;
     int j;
-    double value;
-    if(!PyArg_ParseTuple(args, "Oiid:py_matrix_set", &pf, &i, &j, &value)) return NULL;
+    double real;
+    double imag;
+    if(!PyArg_ParseTuple(args, "Oiidd:py_matrix_set", &pf, &i, &j, &real, &imag)) return NULL;
 
     //printf("print (%d,%d)\n",i,j);
     //printf("pf %p\n",pf);
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
     //printf("mat %p\n",mat);
-    mat->value.f[i*mat->ncol + j] = value;
+    mat->value.f[i*mat->ncol + j] = real;
+    if (mat->type == T_COMPLEX) {
+        mat->value.f[i*mat->ncol + j + 1] = imag;
+    }
     //printf("%lf\n",mat->value.f[i*mat->ncol + j]);
     return Py_None;
 }
@@ -361,19 +369,24 @@ static PyObject* py_sparse_matrix_new(PyObject* self, PyObject* args){
     return po;
 }
 
-static PyObject* py_sparse_matrix_set_real(PyObject* self, PyObject* args) {
+static PyObject* py_sparse_matrix_set(PyObject* self, PyObject* args) {
     
     PyObject* pf = NULL;
     int i;
     int j;
-    double value;
-    if(!PyArg_ParseTuple(args, "Oiid:py_sparse_matrix_set", &pf, &i, &j, &value)) return NULL;
+    double real;
+    double imag;
+    if(!PyArg_ParseTuple(args, "Oiidd:py_sparse_matrix_set", &pf, &i, &j, &real, &imag)) return NULL;
 
     //printf("print (%d,%d)\n",i,j);
     //printf("pf %p\n",pf);
     smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
     //printf("smat %p\n",mat);
-    smatrix_set_real_value(mat,i,j,value);
+    if(mat->type == T_COMPLEX) {
+        smatrix_set_complex_value(mat,i,j,real, imag);
+    } else if(mat->type == T_FLOAT) {
+        smatrix_set_real_value(mat,i,j,real);
+    }
     return Py_None;
 }
 
@@ -428,7 +441,7 @@ static PyMethodDef mainMethods[] = {
     {"move_matrix_device", py_move_matrix_device, METH_VARARGS, "move_matrix_device"},
     {"move_matrix_host", py_move_matrix_host, METH_VARARGS, "move_matrix_host"},
     {"sparse_matrix_new", py_sparse_matrix_new, METH_VARARGS, "sparse_matrix_new"},
-    {"sparse_matrix_set_real", py_sparse_matrix_set_real, METH_VARARGS, "sparse_matrix_set_real"},
+    {"sparse_matrix_set", py_sparse_matrix_set, METH_VARARGS, "sparse_matrix_set"},
     {"sparse_matrix_pack", py_sparse_matrix_pack, METH_VARARGS, "sparse_matrix_pack"},
     {"move_sparse_matrix_device", py_move_sparse_matrix_device, METH_VARARGS, "move_sparse_matrix_device"},
     {"move_sparse_matrix_host", py_move_sparse_matrix_host, METH_VARARGS, "move_sparse_matrix_host"},

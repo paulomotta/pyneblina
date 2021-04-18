@@ -14,8 +14,8 @@ def test_vec_add():
     vec_2 = vector_new(n, float)
 
     for i in range(n):
-        vector_set(vec_f, i, 1.0)
-        vector_set(vec_2, i, 1.0)
+        vector_set(vec_f, i, 1.0, 0.0)
+        vector_set(vec_2, i, 1.0, 0.0)
 
     move_vector_device(vec_f)
     move_vector_device(vec_2)
@@ -37,13 +37,13 @@ def test_vector_matrix_multiplication():
     n = 3
     vec_f = vector_new(n, float)
     for i in range(n):
-        vector_set(vec_f, i, 1.0)
+        vector_set(vec_f, i, 1.0, 0.0)
 
     mat_f = matrix_new(n, n, float)
 
     for i in range(n):
         for j in range(n):
-            matrix_set(mat_f, i, j, 2.0)
+            matrix_set(mat_f, i, j, 2.0, 0.0)
 
     move_vector_device(vec_f)
     move_matrix_device(mat_f)
@@ -65,25 +65,25 @@ def test_vector_sparse_matrix_multiplication():
     n = 10
     vec_f = vector_new(n, float)
     for i in range(n):
-        vector_set(vec_f, i, 3.0)
+        vector_set(vec_f, i, 3.0, 0.0)
 
     smat_f = sparse_matrix_new(n, n, float)
 
-    sparse_matrix_set_real(smat_f, 0, 0, 3.)
-    sparse_matrix_set_real(smat_f, 0, 1, 3.)
-    sparse_matrix_set_real(smat_f, 0, 9, 3.)
+    sparse_matrix_set(smat_f, 0, 0, 3., 0.0)
+    sparse_matrix_set(smat_f, 0, 1, 3., 0.0)
+    sparse_matrix_set(smat_f, 0, 9, 3., 0.0)
 
-    sparse_matrix_set_real(smat_f, 1, 1, 3.)
-    sparse_matrix_set_real(smat_f, 1, 5, 3.)
-    sparse_matrix_set_real(smat_f, 1, 8, 3.)
+    sparse_matrix_set(smat_f, 1, 1, 3., 0.0)
+    sparse_matrix_set(smat_f, 1, 5, 3., 0.0)
+    sparse_matrix_set(smat_f, 1, 8, 3., 0.0)
 
-    sparse_matrix_set_real(smat_f, 2, 2, 3.)
-    sparse_matrix_set_real(smat_f, 2, 4, 3.)
-    sparse_matrix_set_real(smat_f, 2, 7, 3.)
+    sparse_matrix_set(smat_f, 2, 2, 3., 0.0)
+    sparse_matrix_set(smat_f, 2, 4, 3., 0.0)
+    sparse_matrix_set(smat_f, 2, 7, 3., 0.0)
 
-    sparse_matrix_set_real(smat_f, 3, 3, 3.)
-    sparse_matrix_set_real(smat_f, 3, 1, 3.)
-    sparse_matrix_set_real(smat_f, 3, 6, 3.)
+    sparse_matrix_set(smat_f, 3, 3, 3., 0.0)
+    sparse_matrix_set(smat_f, 3, 1, 3., 0.0)
+    sparse_matrix_set(smat_f, 3, 6, 3., 0.0)
 
     sparse_matrix_pack(smat_f)
 
@@ -106,13 +106,13 @@ def test_vec_conjugate():
     n = 3
     v1 = vector_new(n, complex)
 
-    vector_set(v1, 0, 2.0, 2.0)
-    vector_set(v1, 1, 2.0, 2.0)
-    vector_set(v1, 2, 2.0, 2.0)
+    for i in range(n):
+        vector_set(v1, i, 2.0, 2.0)
 
     res = vec_conj(v1)
 
-    # TODO completar o get/set para complexos
+    out = move_vector_host(res)
+
     for i in range(n * 2):
         print(vector_get(out, 2 * i))
         print(vector_get(out, 2 * i + 1))
@@ -127,7 +127,7 @@ def test_vec_sum():
     v1 = vector_new(n, float)
 
     for i in range(n):
-        vector_set(v1, i, 2.0)
+        vector_set(v1, i, 2.0, 0.0)
 
     move_vector_device(v1)
 
@@ -142,12 +142,10 @@ def test_vec_add_off():
     print("test_vec_add_off")
     init_engine()
     n = 4
-    v1 = vector_new(n, 2)  # 2 -> float
+    v1 = vector_new(n, float)
 
-    vector_set(v1, 0, 2.0)
-    vector_set(v1, 1, 2.0)
-    vector_set(v1, 2, 2.0)
-    vector_set(v1, 3, 2.0)
+    for i in range(n):
+        vector_set(v1, i, 2.0, 0.0)
 
     move_vector_device(v1)
 
@@ -170,8 +168,8 @@ def test_vec_prod():
     v2 = vector_new(n, float)
 
     for i in range(n):
-        vector_set(v1, i, 1.0)
-        vector_set(v2, i, 1.0)
+        vector_set(v1, i, 1.0, 0.0)
+        vector_set(v2, i, 1.0, 0.0)
 
     move_vector_device(v1)
     move_vector_device(v2)
@@ -189,7 +187,7 @@ def test_vec_prod():
 test_vec_add()
 test_vector_matrix_multiplication()
 test_vector_sparse_matrix_multiplication()
-# test_vec_conjugate()
+test_vec_conjugate()
 test_vec_sum()
 test_vec_add_off()
 test_vec_prod()
