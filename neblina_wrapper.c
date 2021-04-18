@@ -365,6 +365,32 @@ static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
     return Py_None;
 }
 
+static PyObject* py_move_sparse_matrix_device(PyObject* self, PyObject* args) {
+    
+    PyObject* pf = NULL;
+    if(!PyArg_ParseTuple(args, "O:py_move_sparse_matrix_device", &pf)) return NULL;
+
+    smatrix_t * smat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
+    smatreqdev(smat);
+    return Py_None;
+}
+
+static PyObject* py_move_sparse_matrix_host(PyObject* self, PyObject* args) {
+    
+    PyObject* pf = NULL;
+    if(!PyArg_ParseTuple(args, "O:py_move_sparse_matrix_device", &pf)) return NULL;
+
+    smatrix_t * smat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
+    smatreqhost(smat); //should use this function? It seems that it creates the object in the stack
+    //printf("mat %p\n",mat);
+//    int n = (mat->type==T_FLOAT?mat->nrow*mat->ncol:2*mat->nrow*mat->ncol);
+//    matrix_t * out = matrix_new(mat->nrow, mat->ncol, mat->type);
+//    cl_int status = clEnqueueReadBuffer(clinfo.q, mat->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
+//    CLERR
+    PyObject* po = PyCapsule_New((void*)smat, "py_sparse_matrix_new", py_sparse_matrix_delete);
+    return po;
+}
+
 static PyMethodDef mainMethods[] = {
     {"init_engine", py_init_engine, METH_VARARGS, "init_engine"},
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
@@ -381,6 +407,8 @@ static PyMethodDef mainMethods[] = {
     {"sparse_matrix_new", py_sparse_matrix_new, METH_VARARGS, "sparse_matrix_new"},
     {"sparse_matrix_set_real", py_sparse_matrix_set_real, METH_VARARGS, "sparse_matrix_set_real"},
     {"sparse_matrix_pack", py_sparse_matrix_pack, METH_VARARGS, "sparse_matrix_pack"},
+    {"move_sparse_matrix_device", py_move_sparse_matrix_device, METH_VARARGS, "move_sparse_matrix_device"},
+    {"move_sparse_matrix_host", py_move_sparse_matrix_host, METH_VARARGS, "move_sparse_matrix_host"},
     {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
     {"matvec_mul", py_matvec_mul, METH_VARARGS, "matvec_mul"},
     {"vec_prod", py_vec_prod, METH_VARARGS, "vec_prod"},
