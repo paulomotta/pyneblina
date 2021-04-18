@@ -58,6 +58,34 @@ def test_vector_matrix_multiplication():
     stop_engine()
 
 
+def test_vector_matrix_multiplication_complex():
+    print("test_vector_matrix_multiplication_complex")
+    init_engine()
+
+    n = 3
+    vec_f = vector_new(n, complex)
+    for i in range(n):
+        vector_set(vec_f, i, 2.0, 2.0)
+
+    mat_f = matrix_new(n, n, complex)
+
+    for i in range(n):
+        for j in range(n):
+            matrix_set(mat_f, i, j, 3.0, 3.0)
+
+    move_vector_device(vec_f)
+    move_matrix_device(mat_f)
+
+    res = matvec_mul(vec_f, mat_f)
+
+    out = move_vector_host(res)
+
+    for i in range(n):
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+
+    stop_engine()
+
+
 def test_vector_sparse_matrix_multiplication():
     print("test_vector_sparse_matrix_multiplication")
     init_engine()
@@ -100,6 +128,49 @@ def test_vector_sparse_matrix_multiplication():
     stop_engine()
 
 
+def test_vector_sparse_matrix_multiplication_complex():
+    print("test_vector_sparse_matrix_multiplication_complex")
+    print("this is still wrong, indices 3 and 4 should return 54 as well")
+    init_engine()
+
+    n = 10
+    vec_f = vector_new(n, complex)
+    for i in range(n):
+        vector_set(vec_f, i, 3.0, 3.0)
+
+    smat_f = sparse_matrix_new(n, n, complex)
+
+    sparse_matrix_set(smat_f, 0, 0, 3., 3.0)
+    sparse_matrix_set(smat_f, 0, 1, 3., 3.0)
+    sparse_matrix_set(smat_f, 0, 9, 3., 3.0)
+
+    sparse_matrix_set(smat_f, 1, 1, 3., 3.0)
+    sparse_matrix_set(smat_f, 1, 5, 3., 3.0)
+    sparse_matrix_set(smat_f, 1, 8, 3., 3.0)
+
+    sparse_matrix_set(smat_f, 2, 2, 3., 3.0)
+    sparse_matrix_set(smat_f, 2, 4, 3., 3.0)
+    sparse_matrix_set(smat_f, 2, 7, 3., 3.0)
+
+    sparse_matrix_set(smat_f, 3, 3, 3., 3.0)
+    sparse_matrix_set(smat_f, 3, 1, 3., 3.0)
+    sparse_matrix_set(smat_f, 3, 6, 3., 3.0)
+
+    sparse_matrix_pack(smat_f)
+
+    move_vector_device(vec_f)
+    move_sparse_matrix_device(smat_f)
+
+    res = sparse_matvec_mul(vec_f, smat_f)
+
+    out = move_vector_host(res)
+
+    for i in range(n):
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+
+    stop_engine()
+
+
 def test_vec_conjugate():
     print("test_vec_conjugate")
     init_engine()
@@ -114,8 +185,7 @@ def test_vec_conjugate():
     out = move_vector_host(res)
 
     for i in range(n):
-        print(vector_get(out, 2 * i))
-        print(vector_get(out, 2 * i + 1))
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
     stop_engine()
 
@@ -184,12 +254,38 @@ def test_vec_prod():
     stop_engine()
 
 
+def test_vec_prod_complex():
+    print("test_vec_prod_complex")
+    init_engine()
+    n = 3
+    v1 = vector_new(n, complex)
+    v2 = vector_new(n, complex)
+
+    for i in range(n):
+        vector_set(v1, i, 1.0, 2.0)
+        vector_set(v2, i, 1.0, 2.0)
+
+    move_vector_device(v1)
+    move_vector_device(v2)
+
+    vec_res = vec_prod(v1, v2)
+
+    out = move_vector_host(vec_res)
+
+    for i in range(n):
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+
+    stop_engine()
+
+
 test_vec_add()
 test_vector_matrix_multiplication()
+test_vector_matrix_multiplication_complex()
 test_vector_sparse_matrix_multiplication()
+test_vector_sparse_matrix_multiplication_complex()
 test_vec_conjugate()
 test_vec_sum()
 test_vec_add_off()
 test_vec_prod()
-
+test_vec_prod_complex()
 sys.exit()
