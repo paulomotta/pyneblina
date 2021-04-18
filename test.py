@@ -28,8 +28,8 @@ def test_vec_add():
 
     stop_engine()
 
-def test_matrix_multiplication():
-    print("test_matrix_multiplication")
+def test_vector_matrix_multiplication():
+    print("test_vector_matrix_multiplication")
     init_engine()
 
     n = 3;
@@ -55,14 +55,14 @@ def test_matrix_multiplication():
 
     stop_engine()
 
-def test_sparse_matrix_multiplication():
-    print("test_sparse_matrix_multiplication")
+def test_vector_sparse_matrix_multiplication():
+    print("test_vector_sparse_matrix_multiplication")
     init_engine()
 
     n = 10
     vec_f = vector_new(n, float)
     for i in range(n):
-        vector_set(vec_f, i, 1.0)
+        vector_set(vec_f, i, 3.0)
 
     smat_f = sparse_matrix_new(n,n, float)
 
@@ -84,17 +84,12 @@ def test_sparse_matrix_multiplication():
 
     sparse_matrix_pack(smat_f)
 
-    print(1)
     move_vector_device(vec_f)
-    print(2)
     move_sparse_matrix_device(smat_f)
-    print(3)
 
-    res = matvec_mul(smat_f, vec_f)
-    print(4)
+    res = sparse_matvec_mul(vec_f, smat_f)
 
     out = move_vector_host(res)
-    print(5)
 
     for i in range(n):
         print(vector_get(out,i))
@@ -184,8 +179,8 @@ def test_vec_prod():
     stop_engine()
 
 test_vec_add()
-test_matrix_multiplication()
-#test_sparse_matrix_multiplication()
+test_vector_matrix_multiplication()
+test_vector_sparse_matrix_multiplication()
 #test_vec_conjugate()
 test_vec_sum()
 test_vec_add_off()

@@ -157,6 +157,29 @@ static PyObject* py_matvec_mul(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_sparse_matvec_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    PyObject* b = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_sparse_matvec_mul", &a, &b)) return NULL;
+
+    //printf("a %p\n",a);
+    //printf("b %p\n",b);
+    
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+//        printf("vec_a %p\n",vec_a);
+    smatrix_t * smat_b = (smatrix_t *)PyCapsule_GetPointer(b, "py_sparse_matrix_new");
+//        printf("smat_b %p\n",smat_b);
+
+    
+    object_t ** in = convertToObject4(vec_a, smat_b);
+    
+    vector_t * r = (vector_t *) matvec_mul3((void **) in, NULL );
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
+
 static PyObject* py_vec_prod(PyObject* self, PyObject* args) {
     
     PyObject* a = NULL;
@@ -411,6 +434,7 @@ static PyMethodDef mainMethods[] = {
     {"move_sparse_matrix_host", py_move_sparse_matrix_host, METH_VARARGS, "move_sparse_matrix_host"},
     {"vec_add", py_vec_add, METH_VARARGS, "vec_add"},
     {"matvec_mul", py_matvec_mul, METH_VARARGS, "matvec_mul"},
+    {"sparse_matvec_mul", py_sparse_matvec_mul, METH_VARARGS, "sparse_matvec_mul"},
     {"vec_prod", py_vec_prod, METH_VARARGS, "vec_prod"},
     {"vec_add_off", py_vec_add_off, METH_VARARGS, "vec_add_off"},
     {"vec_sum", py_vec_sum, METH_VARARGS, "vec_sum"},
