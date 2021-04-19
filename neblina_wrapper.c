@@ -402,7 +402,11 @@ static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
 
     //printf("pf %p\n",pf);
     smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
-    smatrix_pack(mat);
+    if (mat->type == T_FLOAT) {
+        smatrix_pack(mat);
+    } else {
+        smatrix_pack_complex(mat);
+    }
     return Py_None;
 }
 
