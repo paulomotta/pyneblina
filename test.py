@@ -130,7 +130,6 @@ def test_vector_sparse_matrix_multiplication():
 
 def test_vector_sparse_matrix_multiplication_complex():
     print("test_vector_sparse_matrix_multiplication_complex")
-    print("this is still wrong, indices 3 and 4 should return 54 as well")
     init_engine()
 
     n = 10
