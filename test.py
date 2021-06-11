@@ -7,7 +7,7 @@ complex = 13
 
 def test_vec_add():
     print("test_vec_add")
-    init_engine()
+    init_engine(0)
 
     n = 3
     vec_f = vector_new(n, float)
@@ -32,7 +32,7 @@ def test_vec_add():
 
 def test_vector_matrix_multiplication():
     print("test_vector_matrix_multiplication")
-    init_engine()
+    init_engine(0)
 
     n = 3
     vec_f = vector_new(n, float)
@@ -60,7 +60,7 @@ def test_vector_matrix_multiplication():
 
 def test_vector_matrix_multiplication_complex():
     print("test_vector_matrix_multiplication_complex")
-    init_engine()
+    init_engine(0)
 
     n = 3
     vec_f = vector_new(n, complex)
@@ -88,7 +88,7 @@ def test_vector_matrix_multiplication_complex():
 
 def test_vector_sparse_matrix_multiplication():
     print("test_vector_sparse_matrix_multiplication")
-    init_engine()
+    init_engine(0)
 
     n = 10
     vec_f = vector_new(n, float)
@@ -130,7 +130,7 @@ def test_vector_sparse_matrix_multiplication():
 
 def test_vector_sparse_matrix_multiplication_complex():
     print("test_vector_sparse_matrix_multiplication_complex")
-    init_engine()
+    init_engine(0)
 
     n = 10
     vec_f = vector_new(n, complex)
@@ -172,7 +172,7 @@ def test_vector_sparse_matrix_multiplication_complex():
 
 def test_vec_conjugate():
     print("test_vec_conjugate")
-    init_engine()
+    init_engine(0)
     n = 3
     v1 = vector_new(n, complex)
 
@@ -191,7 +191,7 @@ def test_vec_conjugate():
 
 def test_vec_sum():
     print("test_vec_sum")
-    init_engine()
+    init_engine(0)
     n = 4
     v1 = vector_new(n, float)
 
@@ -209,7 +209,7 @@ def test_vec_sum():
 
 def test_vec_add_off():
     print("test_vec_add_off")
-    init_engine()
+    init_engine(0)
     n = 4
     v1 = vector_new(n, float)
 
@@ -231,7 +231,7 @@ def test_vec_add_off():
 
 def test_vec_prod():
     print("test_vec_prod")
-    init_engine()
+    init_engine(0)
     n = 3
     v1 = vector_new(n, float)
     v2 = vector_new(n, float)
@@ -255,7 +255,7 @@ def test_vec_prod():
 
 def test_vec_prod_complex():
     print("test_vec_prod_complex")
-    init_engine()
+    init_engine(0)
     n = 3
     v1 = vector_new(n, complex)
     v2 = vector_new(n, complex)

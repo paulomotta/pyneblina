@@ -6,7 +6,9 @@
 static PyObject* py_init_engine(PyObject* self, PyObject* args){
     cl_int err;
     cl_uint num_platforms;
+    int device;
     
+    if (!PyArg_ParseTuple(args, "i", &device)) return NULL;
     err = clGetPlatformIDs(0, NULL, &num_platforms);
     if (err == CL_SUCCESS) {
             //std::cout << "Success. Platforms available: " << num_platforms
@@ -16,7 +18,7 @@ static PyObject* py_init_engine(PyObject* self, PyObject* args){
             //        << std::endl;
     }
 
-    InitCLEngine();
+    InitCLEngine(device);
 
     Py_RETURN_NONE;
 }
