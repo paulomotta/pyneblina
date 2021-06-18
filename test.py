@@ -1,8 +1,9 @@
+#!/usr/bin/env python3.8
 import sys
 from neblina import *
 
-float = 2
-complex = 13
+float_ = 2
+complex_ = 13
 
 
 def test_vec_add():
@@ -10,8 +11,8 @@ def test_vec_add():
     init_engine(0)
 
     n = 3
-    vec_f = vector_new(n, float)
-    vec_2 = vector_new(n, float)
+    vec_f = vector_new(n, float_)
+    vec_2 = vector_new(n, float_)
 
     for i in range(n):
         vector_set(vec_f, i, 1.0, 0.0)
@@ -35,11 +36,11 @@ def test_vector_matrix_multiplication():
     init_engine(0)
 
     n = 3
-    vec_f = vector_new(n, float)
+    vec_f = vector_new(n, float_)
     for i in range(n):
         vector_set(vec_f, i, 1.0, 0.0)
 
-    mat_f = matrix_new(n, n, float)
+    mat_f = matrix_new(n, n, float_)
 
     for i in range(n):
         for j in range(n):
@@ -63,11 +64,11 @@ def test_vector_matrix_multiplication_complex():
     init_engine(0)
 
     n = 3
-    vec_f = vector_new(n, complex)
+    vec_f = vector_new(n, complex_)
     for i in range(n):
         vector_set(vec_f, i, 2.0, 2.0)
 
-    mat_f = matrix_new(n, n, complex)
+    mat_f = matrix_new(n, n, complex_)
 
     for i in range(n):
         for j in range(n):
@@ -91,11 +92,11 @@ def test_vector_sparse_matrix_multiplication():
     init_engine(0)
 
     n = 10
-    vec_f = vector_new(n, float)
+    vec_f = vector_new(n, float_)
     for i in range(n):
         vector_set(vec_f, i, 3.0, 0.0)
 
-    smat_f = sparse_matrix_new(n, n, float)
+    smat_f = sparse_matrix_new(n, n, float_)
 
     sparse_matrix_set(smat_f, 0, 0, 3., 0.0)
     sparse_matrix_set(smat_f, 0, 1, 3., 0.0)
@@ -133,11 +134,11 @@ def test_vector_sparse_matrix_multiplication_complex():
     init_engine(0)
 
     n = 10
-    vec_f = vector_new(n, complex)
+    vec_f = vector_new(n, complex_)
     for i in range(n):
         vector_set(vec_f, i, 3.0, 3.0)
 
-    smat_f = sparse_matrix_new(n, n, complex)
+    smat_f = sparse_matrix_new(n, n, complex_)
 
     sparse_matrix_set(smat_f, 0, 0, 3., 3.0)
     sparse_matrix_set(smat_f, 0, 1, 3., 3.0)
@@ -174,7 +175,7 @@ def test_vec_conjugate():
     print("test_vec_conjugate")
     init_engine(0)
     n = 3
-    v1 = vector_new(n, complex)
+    v1 = vector_new(n, complex_)
 
     for i in range(n):
         vector_set(v1, i, 2.0, 2.0)
@@ -193,7 +194,7 @@ def test_vec_sum():
     print("test_vec_sum")
     init_engine(0)
     n = 4
-    v1 = vector_new(n, float)
+    v1 = vector_new(n, float_)
 
     for i in range(n):
         vector_set(v1, i, 2.0, 0.0)
@@ -208,10 +209,25 @@ def test_vec_sum():
 
 
 def test_vec_add_off():
+    sparse_matrix_set(smat_f, 0, 0, 3., 3.0)
+    sparse_matrix_set(smat_f, 0, 1, 3., 3.0)
+    sparse_matrix_set(smat_f, 0, 9, 3., 3.0)
+
+    sparse_matrix_set(smat_f, 1, 1, 3., 3.0)
+    sparse_matrix_set(smat_f, 1, 5, 3., 3.0)
+    sparse_matrix_set(smat_f, 1, 8, 3., 3.0)
+
+    sparse_matrix_set(smat_f, 2, 2, 3., 3.0)
+    sparse_matrix_set(smat_f, 2, 4, 3., 3.0)
+    sparse_matrix_set(smat_f, 2, 7, 3., 3.0)
+
+    sparse_matrix_set(smat_f, 3, 3, 3., 3.0)
+    sparse_matrix_set(smat_f, 3, 1, 3., 3.0)
+    sparse_matrix_set(smat_f, 3, 6, 3., 3.0)
     print("test_vec_add_off")
     init_engine(0)
     n = 4
-    v1 = vector_new(n, float)
+    v1 = vector_new(n, float_)
 
     for i in range(n):
         vector_set(v1, i, 2.0, 0.0)
@@ -233,8 +249,8 @@ def test_vec_prod():
     print("test_vec_prod")
     init_engine(0)
     n = 3
-    v1 = vector_new(n, float)
-    v2 = vector_new(n, float)
+    v1 = vector_new(n, float_)
+    v2 = vector_new(n, float_)
 
     for i in range(n):
         vector_set(v1, i, 1.0, 0.0)
@@ -257,8 +273,8 @@ def test_vec_prod_complex():
     print("test_vec_prod_complex")
     init_engine(0)
     n = 3
-    v1 = vector_new(n, complex)
-    v2 = vector_new(n, complex)
+    v1 = vector_new(n, complex_)
+    v2 = vector_new(n, complex_)
 
     for i in range(n):
         vector_set(v1, i, 1.0, 2.0)
@@ -277,14 +293,13 @@ def test_vec_prod_complex():
     stop_engine()
 
 
-test_vec_add()
-test_vector_matrix_multiplication()
-test_vector_matrix_multiplication_complex()
-test_vector_sparse_matrix_multiplication()
+#test_vec_add()
+#test_vector_matrix_multiplication()
+#test_vector_matrix_multiplication_complex()
+#test_vector_sparse_matrix_multiplication()
 test_vector_sparse_matrix_multiplication_complex()
-test_vec_conjugate()
-test_vec_sum()
-test_vec_add_off()
-test_vec_prod()
-test_vec_prod_complex()
-sys.exit()
+#test_vec_conjugate()
+#test_vec_sum()
+#test_vec_add_off()
+#test_vec_prod()
+#test_vec_prod_complex()
