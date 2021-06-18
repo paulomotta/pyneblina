@@ -69,7 +69,7 @@ static PyObject* py_vector_set(PyObject* self, PyObject* args) {
         vec->value.f[n] = real;
     }
     //printf("%lf\n",vec->value.f[n]);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_vector_get(PyObject* self, PyObject* args) {
@@ -97,7 +97,7 @@ static PyObject* py_move_vector_device(PyObject* self, PyObject* args) {
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
     //printf("vec %p\n",vec);
     vecreqdev(vec);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_move_vector_host(PyObject* self, PyObject* args) {
@@ -305,7 +305,7 @@ static PyObject* py_matrix_set(PyObject* self, PyObject* args) {
         mat->value.f[idx] = real;
     }
     //printf("%lf\n",mat->value.f[i*mat->ncol + j]);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_matrix_get(PyObject* self, PyObject* args) {
@@ -335,7 +335,7 @@ static PyObject* py_move_matrix_device(PyObject* self, PyObject* args) {
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
     //printf("mat %p\n",mat);
     matreqdev(mat);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_move_matrix_host(PyObject* self, PyObject* args) {
@@ -394,7 +394,7 @@ static PyObject* py_sparse_matrix_set(PyObject* self, PyObject* args) {
     } else if(mat->type == T_FLOAT) {
         smatrix_set_real_value(mat,i,j,real);
     }
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
@@ -409,7 +409,7 @@ static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
     } else {
         smatrix_pack_complex(mat);
     }
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_move_sparse_matrix_device(PyObject* self, PyObject* args) {
@@ -419,7 +419,7 @@ static PyObject* py_move_sparse_matrix_device(PyObject* self, PyObject* args) {
 
     smatrix_t * smat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
     smatreqdev(smat);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_move_sparse_matrix_host(PyObject* self, PyObject* args) {
