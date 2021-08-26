@@ -1,10 +1,15 @@
 #!/usr/bin/env python3.8
 import sys
+import time
+from datetime import datetime
+
 from neblina import *
 
 float_ = 2
 complex_ = 13
 
+def current_milli_time():
+    return round(time.time() * 1000)
 
 def test_vec_add():
     print("test_vec_add")
@@ -63,7 +68,7 @@ def test_vector_matrix_multiplication_complex():
     print("test_vector_matrix_multiplication_complex")
     init_engine(0)
 
-    n = 3
+    n = 7000
     vec_f = vector_new(n, complex_)
     for i in range(n):
         vector_set(vec_f, i, 2.0, 2.0)
@@ -74,15 +79,24 @@ def test_vector_matrix_multiplication_complex():
         for j in range(n):
             matrix_set(mat_f, i, j, 3.0, 3.0)
 
+    #dt = datetime.now()
+    #ini = dt.microsecond
+    ini = current_milli_time()
+    print(ini)
     move_vector_device(vec_f)
     move_matrix_device(mat_f)
 
     res = matvec_mul(vec_f, mat_f)
 
+    #dt = datetime.now()
+    #end = dt.microsecond
+    end = current_milli_time()
+    print(end - ini)
+
     out = move_vector_host(res)
 
-    for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+    #for i in range(n):
+        #print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
     stop_engine()
 
@@ -295,9 +309,9 @@ def test_vec_prod_complex():
 
 #test_vec_add()
 #test_vector_matrix_multiplication()
-#test_vector_matrix_multiplication_complex()
+test_vector_matrix_multiplication_complex()
 #test_vector_sparse_matrix_multiplication()
-test_vector_sparse_matrix_multiplication_complex()
+#test_vector_sparse_matrix_multiplication_complex()
 #test_vec_conjugate()
 #test_vec_sum()
 #test_vec_add_off()
