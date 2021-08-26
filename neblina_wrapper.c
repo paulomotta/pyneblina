@@ -1,6 +1,9 @@
 #include "Python.h"
 #include "neblina.h"
 #include "neblina_std.h"
+#include "neblina_vector.h"
+#include "neblina_matrix.h"
+#include "neblina_smatrix.h"
 #include "libneblina.h"
 
 static PyObject* py_init_engine(PyObject* self, PyObject* args){
@@ -33,8 +36,9 @@ static void py_vector_delete(PyObject* self) {
     vector_t* vec = (vector_t*)PyCapsule_GetPointer(self, "py_vector_new");
     //printf("vec %p\n",vec);
     //printf("vec->value %p\n",&(vec->value));
-//    free ((void *)&(vec->value));
-    free ((void *)vec);
+    //free ((void *)vec->value.f);
+    //free ((void *)vec);
+    vector_delete(vec);
 }
 
 
@@ -265,8 +269,9 @@ static void py_matrix_delete(PyObject* self) {
     matrix_t* mat = (matrix_t*)PyCapsule_GetPointer(self, "py_matrix_new");
     //printf("mat %p\n",mat);
     //printf("mat->value %p\n",&(mat->value));
-//    free ((void *)&(mat->value));
-    free ((void *)mat);
+    //free ((void *)mat->value.f);
+    //free ((void *)mat);
+    matrix_delete(mat);
 }
 
 
@@ -358,7 +363,9 @@ static PyObject* py_move_matrix_host(PyObject* self, PyObject* args) {
 static void py_sparse_matrix_delete(PyObject* self) {
     smatrix_t* mat = (smatrix_t*)PyCapsule_GetPointer(self, "py_sparse_matrix_new");
     //printf("smat %p\n",mat);
-    free ((void *)mat);
+    //free ((void *)mat->m);
+    //free ((void *)mat);
+    smatrix_delete(mat);
 }
 
 
