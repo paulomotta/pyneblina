@@ -13,7 +13,6 @@ def current_milli_time():
 
 def test_vec_add():
     print("test_vec_add")
-    init_engine(0)
 
     n = 3
     vec_f = vector_new(n, float_)
@@ -33,12 +32,10 @@ def test_vec_add():
     for i in range(n):
         print(vector_get(out, i))
 
-    stop_engine()
 
 
 def test_vector_matrix_multiplication():
     print("test_vector_matrix_multiplication")
-    init_engine(0)
 
     n = 3
     vec_f = vector_new(n, float_)
@@ -61,13 +58,11 @@ def test_vector_matrix_multiplication():
     for i in range(n):
         print(vector_get(out, i))
 
-    stop_engine()
 
 
 def test_vector_matrix_multiplication_complex():
     print("test_vector_matrix_multiplication_complex")
-    init_engine(0)
-
+    
     n = 7000
     vec_f = vector_new(n, complex_)
     for i in range(n):
@@ -87,6 +82,9 @@ def test_vector_matrix_multiplication_complex():
     move_matrix_device(mat_f)
 
     res = matvec_mul(vec_f, mat_f)
+    #tmp = res
+    #vector_delete(res)
+    res = matvec_mul(res, mat_f)
 
     #dt = datetime.now()
     #end = dt.microsecond
@@ -98,12 +96,10 @@ def test_vector_matrix_multiplication_complex():
     #for i in range(n):
         #print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
-    stop_engine()
 
 
 def test_vector_sparse_matrix_multiplication():
     print("test_vector_sparse_matrix_multiplication")
-    init_engine(0)
 
     n = 10
     vec_f = vector_new(n, float_)
@@ -140,12 +136,10 @@ def test_vector_sparse_matrix_multiplication():
     for i in range(n):
         print(vector_get(out, i))
 
-    stop_engine()
 
 
 def test_vector_sparse_matrix_multiplication_complex():
     print("test_vector_sparse_matrix_multiplication_complex")
-    init_engine(0)
 
     n = 10
     vec_f = vector_new(n, complex_)
@@ -182,12 +176,10 @@ def test_vector_sparse_matrix_multiplication_complex():
     for i in range(n):
         print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
-    stop_engine()
 
 
 def test_vec_conjugate():
     print("test_vec_conjugate")
-    init_engine(0)
     n = 3
     v1 = vector_new(n, complex_)
 
@@ -201,12 +193,10 @@ def test_vec_conjugate():
     for i in range(n):
         print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
-    stop_engine()
 
 
 def test_vec_sum():
     print("test_vec_sum")
-    init_engine(0)
     n = 4
     v1 = vector_new(n, float_)
 
@@ -219,27 +209,11 @@ def test_vec_sum():
 
     print(res)
 
-    stop_engine()
 
 
 def test_vec_add_off():
-    sparse_matrix_set(smat_f, 0, 0, 3., 3.0)
-    sparse_matrix_set(smat_f, 0, 1, 3., 3.0)
-    sparse_matrix_set(smat_f, 0, 9, 3., 3.0)
-
-    sparse_matrix_set(smat_f, 1, 1, 3., 3.0)
-    sparse_matrix_set(smat_f, 1, 5, 3., 3.0)
-    sparse_matrix_set(smat_f, 1, 8, 3., 3.0)
-
-    sparse_matrix_set(smat_f, 2, 2, 3., 3.0)
-    sparse_matrix_set(smat_f, 2, 4, 3., 3.0)
-    sparse_matrix_set(smat_f, 2, 7, 3., 3.0)
-
-    sparse_matrix_set(smat_f, 3, 3, 3., 3.0)
-    sparse_matrix_set(smat_f, 3, 1, 3., 3.0)
-    sparse_matrix_set(smat_f, 3, 6, 3., 3.0)
     print("test_vec_add_off")
-    init_engine(0)
+
     n = 4
     v1 = vector_new(n, float_)
 
@@ -256,12 +230,11 @@ def test_vec_add_off():
     for i in range(offset):
         print(vector_get(out, i))
 
-    stop_engine()
 
 
 def test_vec_prod():
     print("test_vec_prod")
-    init_engine(0)
+
     n = 3
     v1 = vector_new(n, float_)
     v2 = vector_new(n, float_)
@@ -280,12 +253,11 @@ def test_vec_prod():
     for i in range(n):
         print(vector_get(out, i))
 
-    stop_engine()
+
 
 
 def test_vec_prod_complex():
     print("test_vec_prod_complex")
-    init_engine(0)
     n = 3
     v1 = vector_new(n, complex_)
     v2 = vector_new(n, complex_)
@@ -304,16 +276,18 @@ def test_vec_prod_complex():
     for i in range(n):
         print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
-    stop_engine()
+    
 
+init_engine(0)
 
-#test_vec_add()
-#test_vector_matrix_multiplication()
+test_vec_add()
+test_vector_matrix_multiplication()
 test_vector_matrix_multiplication_complex()
-#test_vector_sparse_matrix_multiplication()
-#test_vector_sparse_matrix_multiplication_complex()
-#test_vec_conjugate()
-#test_vec_sum()
-#test_vec_add_off()
-#test_vec_prod()
-#test_vec_prod_complex()
+test_vector_sparse_matrix_multiplication()
+test_vector_sparse_matrix_multiplication_complex()
+test_vec_conjugate()
+test_vec_sum()
+test_vec_add_off()
+test_vec_prod()
+test_vec_prod_complex()
+stop_engine()
