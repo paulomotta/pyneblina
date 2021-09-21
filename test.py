@@ -32,6 +32,68 @@ def test_vec_add():
     for i in range(n):
         print(vector_get(out, i))
 
+def test_mat_add():
+    print("test_mat_add")
+
+    n = 3
+    mat_a = matrix_new(n, n, float_)
+    mat_b = matrix_new(n, n, float_)
+
+    for i in range(n):
+        for j in range(n):
+            matrix_set(mat_a, i, j, 2.0, 0.0)
+            matrix_set(mat_b, i, j, 2.0, 0.0)
+
+    move_matrix_device(mat_a)
+    move_matrix_device(mat_b)
+
+    res = mat_add(mat_a, mat_b)
+
+    out = move_matrix_host(res)
+
+    for i in range(n):
+        for j in range(n):
+            print(matrix_get(out, i, j))
+
+def test_scalar_mat_mul():
+    print("test_scalar_mat_mul")
+
+    n = 3
+    scalar = 2;
+    mat_a = matrix_new(n, n, float_)
+
+    for i in range(n):
+        for j in range(n):
+            matrix_set(mat_a, i, j, 2.0, 0.0)
+
+    move_matrix_device(mat_a)
+
+    res = scalar_mat_mul(scalar, mat_a)
+
+    out = move_matrix_host(res)
+
+    for i in range(n):
+        for j in range(n):
+            print(matrix_get(out, i, j))
+
+def test_scalar_vec_mul():
+    print("test_scalar_vec_mul")
+
+    n = 3
+    scalar = 2;
+    vec_a = vector_new(n, float_)
+
+    for i in range(n):
+        vector_set(vec_a, i, 2.0, 0.0)
+
+    move_vector_device(vec_a)
+
+    res = scalar_vec_mul(scalar, vec_a)
+
+    out = move_vector_host(res)
+
+    for i in range(n):
+        print(vector_get(out, i))
 
 
 def test_vector_matrix_multiplication():
@@ -281,6 +343,9 @@ def test_vec_prod_complex():
 init_engine(0)
 
 test_vec_add()
+test_mat_add()
+test_scalar_mat_mul()
+test_scalar_vec_mul()
 test_vector_matrix_multiplication()
 test_vector_matrix_multiplication_complex()
 test_vector_sparse_matrix_multiplication()

@@ -445,6 +445,64 @@ static PyObject* py_move_sparse_matrix_host(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_mat_add(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    PyObject* b = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_mat_add", &a, &b)) return NULL;
+
+    //printf("a %p\n",a);
+    //printf("b %p\n",b);
+    
+    matrix_t * mat_a = (matrix_t *)PyCapsule_GetPointer(a, "py_matrix_new");
+        //printf("vec_a %p\n",vec_a);
+    matrix_t * mat_b = (matrix_t *)PyCapsule_GetPointer(b, "py_matrix_new");
+        //printf("vec_b %p\n",vec_b);
+
+    
+    //TODO completar o vec_add
+    object_t ** in = convertMatMatToObject(mat_a,mat_b);
+    
+    matrix_t * r = (matrix_t *) mat_add((void **) in, NULL );
+    
+
+    PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
+    return po;
+}
+
+static PyObject* py_scalar_mat_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    double scalar;
+    if(!PyArg_ParseTuple(args, "dO:py_scalar_mat_mul", &scalar,&a)) return NULL;
+
+    matrix_t * mat_a = (matrix_t *)PyCapsule_GetPointer(a, "py_matrix_new");
+    
+    object_t ** in = convertScaMatToObject(scalar, mat_a);
+    
+    matrix_t * r = (matrix_t *) mat_mulsc((void **) in, NULL );
+
+    PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
+    return po;
+}
+
+static PyObject* py_scalar_vec_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    double scalar;
+    if(!PyArg_ParseTuple(args, "dO:py_scalar_vec_mul", &scalar,&a)) return NULL;
+
+    //printf("a %p\n",a);
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+    //printf("vec_a %p\n",vec_a);
+    
+    object_t ** in = convertScaVecToObject(scalar, vec_a);
+    
+    vector_t * r = (vector_t *) vec_mulsc((void **) in, NULL );
+    //    printf("r %p\n",r);
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
 static PyMethodDef mainMethods[] = {
     {"init_engine", py_init_engine, METH_VARARGS, "init_engine"},
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
@@ -470,6 +528,9 @@ static PyMethodDef mainMethods[] = {
     {"vec_add_off", py_vec_add_off, METH_VARARGS, "vec_add_off"},
     {"vec_sum", py_vec_sum, METH_VARARGS, "vec_sum"},
     {"vec_conj", py_vec_conj, METH_VARARGS, "vec_conj"},
+    {"mat_add", py_mat_add, METH_VARARGS, "mat_add"},
+    {"scalar_mat_mul", py_scalar_mat_mul, METH_VARARGS, "scalar_mat_mul"},
+    {"scalar_vec_mul", py_scalar_vec_mul, METH_VARARGS, "scalar_vec_mul"},
     {NULL, NULL, 0, NULL}
 };
 
