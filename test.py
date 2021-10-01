@@ -32,6 +32,27 @@ def test_vec_add():
     for i in range(n):
         print(vector_get(out, i))
 
+def test_vec_add_complex():
+    print("test_vec_add_complex")
+
+    n = 3
+    vec_f = vector_new(n, complex_)
+    vec_2 = vector_new(n, complex_)
+
+    for i in range(n):
+        vector_set(vec_f, i, 2*i, 3*i)
+        vector_set(vec_2, i, 1.0, 1.0)
+
+    move_vector_device(vec_f)
+    move_vector_device(vec_2)
+
+    res = vec_add(vec_f, vec_2)
+
+    out = move_vector_host(res)
+
+    for i in range(n):
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+
 def test_mat_add():
     print("test_mat_add")
 
@@ -343,6 +364,7 @@ def test_vec_prod_complex():
 init_engine(0)
 
 test_vec_add()
+test_vec_add_complex()
 test_mat_add()
 test_scalar_mat_mul()
 test_scalar_vec_mul()
