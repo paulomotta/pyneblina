@@ -4,6 +4,7 @@
 #include "neblina_vector.h"
 #include "neblina_matrix.h"
 #include "neblina_smatrix.h"
+#include "neblina_complex.h"
 #include "libneblina.h"
 
 static PyObject* py_init_engine(PyObject* self, PyObject* args){
@@ -30,6 +31,24 @@ static PyObject* py_stop_engine(PyObject* self, PyObject* args){
     ReleaseCLInfo(clinfo);
 
     Py_RETURN_NONE;
+}
+
+static void py_complex_delete(PyObject* self) {
+    complex_t* comp = (complex_t*)PyCapsule_GetPointer(self, "py_complex_new");
+    complex_delete(comp);
+}
+
+
+static PyObject* py_complex_new(PyObject* self, PyObject* args){
+    double real;
+    double imag;
+    if (!PyArg_ParseTuple(args, "dd", &real, &imag)) return NULL;
+
+    complex_t * a = complex_new(real, imag);
+
+    PyObject* po = PyCapsule_New((void*)a, "py_complex_new", py_complex_delete);
+
+    return po;
 }
 
 static void py_vector_delete(PyObject* self) {
@@ -318,7 +337,7 @@ static PyObject* py_matrix_get(PyObject* self, PyObject* args) {
     PyObject* pf = NULL;
     int i;
     int j;
-    if(!PyArg_ParseTuple(args, "Oii:py_matrix_set", &pf, &i, &j)) return NULL;
+    if(!PyArg_ParseTuple(args, "Oii:py_matrix_get", &pf, &i, &j)) return NULL;
 
     //printf("print (%d,%d)\n",i,j);
     //printf("pf %p\n",pf);
@@ -503,6 +522,48 @@ static PyObject* py_scalar_vec_mul(PyObject* self, PyObject* args) {
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
 }
+
+static PyObject* py_complex_scalar_vec_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* scalar = NULL;
+    PyObject* a = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_complex_scalar_vec_mul", &scalar,&a)) return NULL;
+
+    complex_t * complex_scalar = (complex_t *)PyCapsule_GetPointer(scalar, "py_complex_new");
+    vector_t * vec_a = (vector_t *)PyCapsule_GetPointer(a, "py_vector_new");
+    
+    vector_t * r = NULL;
+    if (vec_a->type == T_FLOAT) {
+        r = (vector_t *) vec_mul_complex_scalar ( complex_scalar, vec_a); 
+    } else if (vec_a->type == T_COMPLEX) {
+        r = (vector_t *) mul_complex_scalar_complex_vec( complex_scalar, vec_a);
+    }
+
+    PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
+    return po;
+}
+
+static PyObject* py_complex_scalar_mat_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* scalar = NULL;
+    PyObject* a = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_complex_scalar_mat_mul", &scalar,&a)) return NULL;
+
+    complex_t * complex_scalar = (complex_t *)PyCapsule_GetPointer(scalar, "py_complex_new");
+    matrix_t * mat_a = (matrix_t *)PyCapsule_GetPointer(a, "py_matrix_new");
+    
+    matrix_t * r = NULL;
+    if (mat_a->type == T_FLOAT) {
+        r = (matrix_t *) mul_complex_scalar_float_mat ( complex_scalar, mat_a); 
+    } else if (mat_a->type == T_COMPLEX) {
+        r = (matrix_t *) mul_complex_scalar_complex_mat( complex_scalar, mat_a);
+    }
+
+    PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
+    return po;
+}
+
+
 static PyMethodDef mainMethods[] = {
     {"init_engine", py_init_engine, METH_VARARGS, "init_engine"},
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
@@ -531,6 +592,9 @@ static PyMethodDef mainMethods[] = {
     {"mat_add", py_mat_add, METH_VARARGS, "mat_add"},
     {"scalar_mat_mul", py_scalar_mat_mul, METH_VARARGS, "scalar_mat_mul"},
     {"scalar_vec_mul", py_scalar_vec_mul, METH_VARARGS, "scalar_vec_mul"},
+    {"complex_scalar_vec_mul", py_complex_scalar_vec_mul, METH_VARARGS, "complex_scalar_vec_mul"},
+    {"complex_scalar_mat_mul", py_complex_scalar_mat_mul, METH_VARARGS, "complex_scalar_mat_mul"},
+    {"complex_new", py_complex_new, METH_VARARGS, "complex_new"},
     {NULL, NULL, 0, NULL}
 };
 

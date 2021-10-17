@@ -359,7 +359,74 @@ def test_vec_prod_complex():
     for i in range(n):
         print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
+
+def test_complex_scalar_new():
+    print("test_complex_scalar_new")
+    scalar = complex_new(2,2);
     
+
+def test_complex_scalar_mat_mul():
+    print("test_complex_scalar_mat_mul")
+
+    n = 3
+    scalar = complex_new(2,2);
+    mat_a = matrix_new(n, n, float_)
+    mat_b = matrix_new(n, n, complex_)
+
+    for i in range(n):
+        for j in range(n):
+            matrix_set(mat_a, i, j, 2.0, 0.0)
+            matrix_set(mat_b, i, j, 2.0, 2.0)
+
+    move_matrix_device(mat_a)
+    move_matrix_device(mat_b)
+
+    res = complex_scalar_mat_mul(scalar, mat_a)
+
+    out = move_matrix_host(res)
+
+    for i in range(n):
+        for j in range(n):
+            print(matrix_get(out, i, j))
+    
+    res = complex_scalar_mat_mul(scalar, mat_b)
+
+    out = move_matrix_host(res)
+
+    for i in range(n):
+        for j in range(n):
+            print(matrix_get(out, i, j))
+
+def test_complex_scalar_vec_mul():
+    print("test_complex_scalar_vec_mul")
+
+    n = 3
+    scalar = complex_new(2,2);
+    vec_a = vector_new(n, float_)
+    vec_b = vector_new(n, complex_)
+
+    for i in range(n):
+        vector_set(vec_a, i, 2.0, 0.0)
+        vector_set(vec_b, i, 2.0, 2.0)
+
+    move_vector_device(vec_a)
+    move_vector_device(vec_b)
+
+    print("1")
+    res = complex_scalar_vec_mul(scalar, vec_a)
+    print("2")
+    out = move_vector_host(res)
+
+    for i in range(n):
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+
+    res = complex_scalar_vec_mul(scalar, vec_b)
+
+    out = move_vector_host(res)
+
+    for i in range(n):
+        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+
 
 init_engine(0)
 
@@ -377,4 +444,7 @@ test_vec_sum()
 test_vec_add_off()
 test_vec_prod()
 test_vec_prod_complex()
+test_complex_scalar_new()
+test_complex_scalar_vec_mul()
+test_complex_scalar_mat_mul()
 stop_engine()
