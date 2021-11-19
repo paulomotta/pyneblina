@@ -134,7 +134,7 @@ static PyObject* py_move_vector_host(PyObject* self, PyObject* args) {
     //printf("vec %p\n",vec);
     int n = (vec->type==T_FLOAT?vec->len:2*vec->len);
     vector_t * out = vector_new(vec->len, vec->type);
-    cl_int status = clEnqueueReadBuffer(clinfo.q, vec->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
+    cl_int status = clEnqueueReadBuffer(clinfo.q, (cl_mem)vec->extra, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
     CLERR
     PyObject* po = PyCapsule_New((void*)out, "py_vector_new", py_vector_delete);
     return po;
