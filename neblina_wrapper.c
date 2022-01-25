@@ -373,7 +373,7 @@ static PyObject* py_move_matrix_host(PyObject* self, PyObject* args) {
     //printf("mat %p\n",mat);
     int n = (mat->type==T_FLOAT?mat->nrow*mat->ncol:2*mat->nrow*mat->ncol);
     matrix_t * out = matrix_new(mat->nrow, mat->ncol, mat->type);
-    cl_int status = clEnqueueReadBuffer(clinfo.q, mat->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
+    cl_int status = clEnqueueReadBuffer(clinfo.q, mat->extra, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
     CLERR
     PyObject* po = PyCapsule_New((void*)out, "py_matrix_new", py_matrix_delete);
     return po;
