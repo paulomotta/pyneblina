@@ -1,0 +1,22 @@
+# Pyneblina
+For more information access
+[Paulo Motta's webpage](https://paulomotta.pro.br/wp/2021/05/01/pyneblina-and-neblina-core/)
+
+# Requirements
+- OpenCL
+- Google test framework
+- [Neblina-core](https://github.com/paulomotta/neblina-core)
+
+# Installation
+It is recommended that both neblina-core and pyneblina are
+cloned in the same directory, i.e. they have the same parent folder.
+On the same folder where neblina-core was cloned,
+run the following commands.
+```bash
+https://github.com/paulomotta/pyneblina
+cd pyneblina
+sudo python3 setup.py install
+```
+
+## Testing installation
+To run the unitary tests, execute the command ``python3 test.py``.
