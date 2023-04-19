@@ -2,6 +2,7 @@
 import sys
 import time
 from datetime import datetime
+import pytest
 
 from neblina import *
 
@@ -427,9 +428,72 @@ def test_complex_scalar_vec_mul():
     for i in range(n):
         print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
 
+def test_mat_mul():
+    print("test_mat_mul")
+
+    n = 3
+
+    mat_a = matrix_new(n, n, float_)
+    mat_b = matrix_new(n, n, float_)
+
+    for i in range(n):
+        for j in range(n):
+            matrix_set(mat_a, i, j, 3.0, 0.0)
+            matrix_set(mat_b, i, j, 3.0, 0.0)
+
+    move_matrix_device(mat_a)
+    move_matrix_device(mat_b)
+
+    res = mat_mul(mat_a, mat_b)
+
+    out = move_matrix_host(res)
+
+    for i in range(n):
+        for j in range(n):
+            print(str(i) + " " + str(matrix_get(out, i,j)))
+
+def test_mat_mul_withComplex():
+    print("test_mat_mul_withComplex")
+
+    n = 2
+
+    mat_a = matrix_new(n, n, complex_)
+    mat_b = matrix_new(n, n, complex_)
+
+    matrix_set(mat_a, 0, 0, 17., 1.0)
+    matrix_set(mat_b, 0, 0, 60., 0.0)
+
+    matrix_set(mat_a, 0, 1, -3., 0.0)
+    matrix_set(mat_b, 0, 1, -4., 1.0)
+    
+    matrix_set(mat_a, 1, 0, -7., 1.0)
+    matrix_set(mat_b, 1, 0, -12., 0.0)
+    
+    matrix_set(mat_a, 1, 1, 1., 0.0)
+    matrix_set(mat_b, 1, 1, 0., 1.0)
+    
+
+    move_matrix_device(mat_a)
+    move_matrix_device(mat_b)
+
+    res = mat_mul(mat_a, mat_b)
+
+    r = move_matrix_host(res)
+
+    assert 1056. == matrix_get(r,0,0)
+    assert   60. == matrix_get(r,0,1)
+
+    assert -69. == matrix_get(r,0,2)
+    assert  10. == matrix_get(r,0,3)
+
+    assert -432. == matrix_get(r,2,0)
+    assert   60. == matrix_get(r,2,1)
+
+    assert   27. == matrix_get(r,2,2)
+    assert  -10. == matrix_get(r,2,3)
 
 init_engine(0)
-
+print("start tests")
 test_vec_add()
 test_vec_add_complex()
 test_mat_add()
@@ -447,4 +511,7 @@ test_vec_prod_complex()
 test_complex_scalar_new()
 test_complex_scalar_vec_mul()
 test_complex_scalar_mat_mul()
+test_mat_mul()
+test_mat_mul_withComplex()
+print("completed tests")
 stop_engine()
