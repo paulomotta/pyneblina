@@ -6,7 +6,7 @@ from datetime import datetime
 from neblina import *
 
 float_ = 2
-complex_ = 13
+complex_ = 3
 
 def current_milli_time():
     return round(time.time() * 1000)
@@ -19,18 +19,20 @@ def test_vec_add():
     vec_2 = vector_new(n, float_)
 
     for i in range(n):
-        vector_set(vec_f, i, 1.0, 0.0)
-        vector_set(vec_2, i, 1.0, 0.0)
+        vector_set(vec_f, i,
+                   1.0, 0.0)
+        vector_set(vec_2,
+                   i, 1.0, 0.0)
 
     move_vector_device(vec_f)
     move_vector_device(vec_2)
 
     res = vec_add(vec_f, vec_2)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(vector_get(out, i))
+        print(vector_get(res, i))
 
 def test_vec_add_complex():
     print("test_vec_add_complex")
@@ -48,10 +50,10 @@ def test_vec_add_complex():
 
     res = vec_add(vec_f, vec_2)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+        print(str(i) + " " + str(vector_get(res, 2 * i)) + " " + str(vector_get(res, 2 * i + 1)) + "i")
 
 def test_mat_add():
     print("test_mat_add")
@@ -70,11 +72,11 @@ def test_mat_add():
 
     res = mat_add(mat_a, mat_b)
 
-    out = move_matrix_host(res)
+    move_matrix_host(res)
 
     for i in range(n):
         for j in range(n):
-            print(matrix_get(out, i, j))
+            print(matrix_get(res, i, j))
 
 def test_scalar_mat_mul():
     print("test_scalar_mat_mul")
@@ -91,11 +93,11 @@ def test_scalar_mat_mul():
 
     res = scalar_mat_mul(scalar, mat_a)
 
-    out = move_matrix_host(res)
+    move_matrix_host(res)
 
     for i in range(n):
         for j in range(n):
-            print(matrix_get(out, i, j))
+            print(matrix_get(res, i, j))
 
 def test_scalar_vec_mul():
     print("test_scalar_vec_mul")
@@ -111,10 +113,10 @@ def test_scalar_vec_mul():
 
     res = scalar_vec_mul(scalar, vec_a)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(vector_get(out, i))
+        print(vector_get(res, i))
 
 
 def test_vector_matrix_multiplication():
@@ -136,10 +138,10 @@ def test_vector_matrix_multiplication():
 
     res = matvec_mul(vec_f, mat_f)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(vector_get(out, i))
+        print(vector_get(res, i))
 
 
 
@@ -174,7 +176,7 @@ def test_vector_matrix_multiplication_complex():
     end = current_milli_time()
     print(end - ini)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     #for i in range(n):
         #print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
@@ -214,10 +216,10 @@ def test_vector_sparse_matrix_multiplication():
 
     res = sparse_matvec_mul(vec_f, smat_f)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(vector_get(out, i))
+        print(vector_get(res, i))
 
 
 
@@ -254,10 +256,10 @@ def test_vector_sparse_matrix_multiplication_complex():
 
     res = sparse_matvec_mul(vec_f, smat_f)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+        print(str(i) + " " + str(vector_get(res, 2 * i)) + " " + str(vector_get(res, 2 * i + 1)) + "i")
 
 
 
@@ -271,10 +273,10 @@ def test_vec_conjugate():
 
     res = vec_conj(v1)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+        print(str(i) + " " + str(vector_get(res, 2 * i)) + " " + str(vector_get(res, 2 * i + 1)) + "i")
 
 
 
@@ -308,10 +310,10 @@ def test_vec_add_off():
     offset = 2
     vec_res = vec_add_off(offset, v1)
 
-    out = move_vector_host(vec_res)
+    move_vector_host(vec_res)
 
     for i in range(offset):
-        print(vector_get(out, i))
+        print(vector_get(vec_res, i))
 
 
 
@@ -331,10 +333,10 @@ def test_vec_prod():
 
     vec_res = vec_prod(v1, v2)
 
-    out = move_vector_host(vec_res)
+    move_vector_host(vec_res)
 
     for i in range(n):
-        print(vector_get(out, i))
+        print(vector_get(vec_res, i))
 
 
 
@@ -354,10 +356,10 @@ def test_vec_prod_complex():
 
     vec_res = vec_prod(v1, v2)
 
-    out = move_vector_host(vec_res)
+    move_vector_host(vec_res)
 
     for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+        print(str(i) + " " + str(vector_get(vec_res, 2 * i)) + " " + str(vector_get(vec_res, 2 * i + 1)) + "i")
 
 
 def test_complex_scalar_new():
@@ -383,26 +385,26 @@ def test_complex_scalar_mat_mul():
 
     res = complex_scalar_mat_mul(scalar, mat_a)
 
-    out = move_matrix_host(res)
+    move_matrix_host(res)
 
     for i in range(n):
         for j in range(n):
-            print(matrix_get(out, i, j))
+            print(matrix_get(res, i, j))
     
     res = complex_scalar_mat_mul(scalar, mat_b)
 
-    out = move_matrix_host(res)
+    move_matrix_host(res)
 
     for i in range(n):
         for j in range(n):
-            print(matrix_get(out, i, j))
+            print(matrix_get(res, i, j))
 
 def test_complex_scalar_vec_mul():
     print("test_complex_scalar_vec_mul")
 
     n = 3
     scalar = complex_new(2,2);
-    vec_a = vector_new(n, float_)
+    vec_a = vector_new(n, FLOAT)
     vec_b = vector_new(n, complex_)
 
     for i in range(n):
@@ -415,20 +417,20 @@ def test_complex_scalar_vec_mul():
     print("1")
     res = complex_scalar_vec_mul(scalar, vec_a)
     print("2")
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+        print(str(i) + " " + str(vector_get(res, 2 * i)) + " " + str(vector_get(res, 2 * i + 1)) + "i")
 
     res = complex_scalar_vec_mul(scalar, vec_b)
 
-    out = move_vector_host(res)
+    move_vector_host(res)
 
     for i in range(n):
-        print(str(i) + " " + str(vector_get(out, 2 * i)) + " " + str(vector_get(out, 2 * i + 1)) + "i")
+        print(str(i) + " " + str(vector_get(res, 2 * i)) + " " + str(vector_get(res, 2 * i + 1)) + "i")
 
 
-init_engine(0)
+init_engine(GPU,0)
 
 test_vec_add()
 test_vec_add_complex()

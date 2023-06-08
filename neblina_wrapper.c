@@ -5,37 +5,68 @@
 #include "neblina_matrix.h"
 #include "neblina_smatrix.h"
 #include "neblina_complex.h"
+#include "bridge_api.h"
 #include "libneblina.h"
 
+bridge_manager_t bridge_manager;
+int bridge_index = 0;
+
 static PyObject* py_init_engine(PyObject* self, PyObject* args){
-    cl_int err;
-    cl_uint num_platforms;
+    //cl_int err;
+    //cl_uint num_platforms;
     int device;
+    int bridge;
     
-    if (!PyArg_ParseTuple(args, "i", &device)) return NULL;
-    err = clGetPlatformIDs(0, NULL, &num_platforms);
-    if (err == CL_SUCCESS) {
+    if (!PyArg_ParseTuple(args, "ii", &bridge, &device)) return NULL;
+    //err = clGetPlatformIDs(0, NULL, &num_platforms);
+    //if (err == CL_SUCCESS) {
             //std::cout << "Success. Platforms available: " << num_platforms
             //        << std::endl;
-    } else {
+    //} else {
             //std::cout << "Error. Platforms available: " << num_platforms
             //        << std::endl;
+    //}
+
+    //InitCLEngine(device);
+    bridge_index = device;
+    char * lib_name;
+    switch(bridge){
+        case 0:
+            lib_name = "/usr/local/lib64/libneblina-cpu-bridge.so";
+            break;
+        case 1:
+            lib_name = "/usr/local/lib64/libneblina-opencl-bridge.so";
+            break;
+        default:
+            lib_name = "/usr/local/lib64/libneblina-cpu-bridge.so";
+            break;
     }
-
-    InitCLEngine(device);
-
+    load_plugin(&bridge_manager, lib_name, bridge_index);
+    bridge_manager.bridges[bridge_index].InitEngine_f(device);
+    printf("3\n");
     Py_RETURN_NONE;
 }
 
 static PyObject* py_stop_engine(PyObject* self, PyObject* args){
-    ReleaseCLInfo(clinfo);
-
+    //ReleaseCLInfo(clinfo);
+    release_plugin(&bridge_manager, bridge_index);
+//    double v1[2];
+//    double v2[2];
+//    double *res;
+//    v1[0] = 1;
+//    v1[1] = 2;
+//    v2[0] = 1;
+//    v2[1] = 2;
+//    res = bridge_manager.bridges[bridge_index].addVectorF_f(&v1,&v2,2);
+//    for (int i=0;i<2;i++) {
+//        printf("%f\n",res[i]);
+//    }
     Py_RETURN_NONE;
 }
 
 static void py_complex_delete(PyObject* self) {
     complex_t* comp = (complex_t*)PyCapsule_GetPointer(self, "py_complex_new");
-    complex_delete(comp);
+    bridge_manager.bridges[bridge_index].complex_delete(comp);
 }
 
 
@@ -44,7 +75,7 @@ static PyObject* py_complex_new(PyObject* self, PyObject* args){
     double imag;
     if (!PyArg_ParseTuple(args, "dd", &real, &imag)) return NULL;
 
-    complex_t * a = complex_new(real, imag);
+    complex_t * a = bridge_manager.bridges[bridge_index].complex_new(real, imag);
 
     PyObject* po = PyCapsule_New((void*)a, "py_complex_new", py_complex_delete);
 
@@ -57,7 +88,7 @@ static void py_vector_delete(PyObject* self) {
     //printf("vec->value %p\n",&(vec->value));
     //free ((void *)vec->value.f);
     //free ((void *)vec);
-    vector_delete(vec);
+    bridge_manager.bridges[bridge_index].vector_delete(vec);
 }
 
 
@@ -66,7 +97,7 @@ static PyObject* py_vector_new(PyObject* self, PyObject* args){
     int data_type;
     if (!PyArg_ParseTuple(args, "ii", &len,&data_type)) return NULL;
     //printf("create %d\n",len);
-    vector_t * a = vector_new(len, data_type);
+    vector_t * a = bridge_manager.bridges[bridge_index].vector_new(len, data_type);
     //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_vector_new", py_vector_delete);
     //printf("capsule_new %p\n",po);
@@ -119,27 +150,28 @@ static PyObject* py_move_vector_device(PyObject* self, PyObject* args) {
     
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
     //printf("vec %p\n",vec);
-    vecreqdev(vec);
+    bridge_manager.bridges[bridge_index].vecreqdev(vec);
     Py_RETURN_NONE;
 }
 
 static PyObject* py_move_vector_host(PyObject* self, PyObject* args) {
-    
+
+
     PyObject* pf = NULL;
-    if(!PyArg_ParseTuple(args, "O:py_move_vector_device", &pf)) return NULL;
+    if(!PyArg_ParseTuple(args, "O:py_move_vector_host", &pf)) return NULL;
 
     //printf("pf %p\n",pf);
     
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
     //printf("vec %p\n",vec);
-    int n = (vec->type==T_FLOAT?vec->len:2*vec->len);
-    vector_t * out = vector_new(vec->len, vec->type);
-    cl_int status = clEnqueueReadBuffer(clinfo.q, (cl_mem)vec->extra, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
-    CLERR
-    PyObject* po = PyCapsule_New((void*)out, "py_vector_new", py_vector_delete);
-    return po;
-}
+    bridge_manager.bridges[bridge_index].vecreqhost(vec);
+    Py_RETURN_NONE;
+    //vecreqdev(vec);
+    //PyObject* po = PyCapsule_New((void*)vec, "py_vector_new", py_vector_delete);
+    //return po;
 
+}
+//
 static PyObject* py_vec_add(PyObject* self, PyObject* args) {
     
     PyObject* a = NULL;
@@ -158,7 +190,8 @@ static PyObject* py_vec_add(PyObject* self, PyObject* args) {
     //TODO completar o vec_add
     object_t ** in = convertToObject(vec_a,vec_b);
     
-    vector_t * r = (vector_t *) vec_add((void **) in, NULL );
+    //printf("vec add to call\n");
+    vector_t * r = (vector_t *) vec_add(&bridge_manager, bridge_index, (void **) in, NULL );
     
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
@@ -182,7 +215,7 @@ static PyObject* py_matvec_mul(PyObject* self, PyObject* args) {
     
     object_t ** in = convertToObject3(vec_a, mat_b);
     
-    vector_t * r = (vector_t *) matvec_mul3((void **) in, NULL );
+    vector_t * r = (vector_t *) matvec_mul3(&bridge_manager, bridge_index, (void **) in, NULL );
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
@@ -205,7 +238,7 @@ static PyObject* py_sparse_matvec_mul(PyObject* self, PyObject* args) {
     
     object_t ** in = convertToObject4(vec_a, smat_b);
     
-    vector_t * r = (vector_t *) matvec_mul3((void **) in, NULL );
+    vector_t * r = (vector_t *) matvec_mul3(&bridge_manager, bridge_index, (void **) in, NULL );
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
@@ -228,7 +261,7 @@ static PyObject* py_vec_prod(PyObject* self, PyObject* args) {
     
     object_t ** in = convertToObject(vec_a,vec_b);
     
-    vector_t * r = (vector_t *) vec_prod((void **) in, NULL );
+    vector_t * r = (vector_t *) vec_prod(&bridge_manager, bridge_index, (void **) in, NULL );
     
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
@@ -245,7 +278,7 @@ static PyObject* py_vec_add_off(PyObject* self, PyObject* args) {
 
     object_t ** in = convertToObject2(offset, vec_a);
     
-    vector_t * r = (vector_t *) vec_add_off((void **) in, NULL );   
+    vector_t * r = (vector_t *) vec_add_off(&bridge_manager, bridge_index, (void **) in, NULL );   
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
@@ -260,7 +293,7 @@ static PyObject* py_vec_sum(PyObject* self, PyObject* args) {
     
     object_t ** in = convertToObject(vec_a, NULL);
     
-    object_t * r = (object_t *) vec_sum((void **) in, NULL );
+    object_t * r = (object_t *) vec_sum(&bridge_manager, bridge_index, (void **) in, NULL );
 
     PyObject * result = PyFloat_FromDouble((double)r->value.f);
     
@@ -276,7 +309,7 @@ static PyObject* py_vec_conj(PyObject* self, PyObject* args) {
     
     object_t ** in = convertToObject(vec_a, NULL);
     
-    vector_t * r = (vector_t *) vec_conj((void **) in, NULL );
+    vector_t * r = (vector_t *) vec_conj(&bridge_manager, bridge_index, (void **) in, NULL );
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
@@ -290,7 +323,7 @@ static void py_matrix_delete(PyObject* self) {
     //printf("mat->value %p\n",&(mat->value));
     //free ((void *)mat->value.f);
     //free ((void *)mat);
-    matrix_delete(mat);
+    bridge_manager.bridges[bridge_index].matrix_delete(mat);
 }
 
 
@@ -301,7 +334,7 @@ static PyObject* py_matrix_new(PyObject* self, PyObject* args){
     if (!PyArg_ParseTuple(args, "iii", &rows,&cols,&data_type)) return NULL;
     //printf("create %d\n",rows);
     //printf("create %d\n",cols);
-    matrix_t * a = matrix_new(rows, cols, data_type);
+    matrix_t * a = bridge_manager.bridges[bridge_index].matrix_new(rows, cols, data_type);
     //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_matrix_new", py_matrix_delete);
     //printf("capsule_new %p\n",po);
@@ -358,7 +391,7 @@ static PyObject* py_move_matrix_device(PyObject* self, PyObject* args) {
     
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
     //printf("mat %p\n",mat);
-    matreqdev(mat);
+    bridge_manager.bridges[bridge_index].matreqdev(mat);
     Py_RETURN_NONE;
 }
 
@@ -370,13 +403,15 @@ static PyObject* py_move_matrix_host(PyObject* self, PyObject* args) {
     //printf("pf %p\n",pf);
     
     matrix_t * mat = (matrix_t *)PyCapsule_GetPointer(pf, "py_matrix_new");
-    //printf("mat %p\n",mat);
-    int n = (mat->type==T_FLOAT?mat->nrow*mat->ncol:2*mat->nrow*mat->ncol);
-    matrix_t * out = matrix_new(mat->nrow, mat->ncol, mat->type);
-    cl_int status = clEnqueueReadBuffer(clinfo.q, mat->extra, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
-    CLERR
-    PyObject* po = PyCapsule_New((void*)out, "py_matrix_new", py_matrix_delete);
-    return po;
+    bridge_manager.bridges[bridge_index].matreqhost(mat); //should use this function? It seems that it creates the object in the stack
+    //    //printf("mat %p\n",mat);
+//    int n = (mat->type==T_FLOAT?mat->nrow*mat->ncol:2*mat->nrow*mat->ncol);
+//    matrix_t * out = matrix_new(mat->nrow, mat->ncol, mat->type);
+//    cl_int status = clEnqueueReadBuffer(clinfo.q, mat->extra, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
+//    CLERR
+//    PyObject* po = PyCapsule_New((void*)out, "py_matrix_new", py_matrix_delete);
+//    return po;
+    Py_RETURN_NONE;
 }
 
 static void py_sparse_matrix_delete(PyObject* self) {
@@ -384,7 +419,7 @@ static void py_sparse_matrix_delete(PyObject* self) {
     //printf("smat %p\n",mat);
     //free ((void *)mat->m);
     //free ((void *)mat);
-    smatrix_delete(mat);
+    bridge_manager.bridges[bridge_index].smatrix_delete(mat);
 }
 
 
@@ -395,7 +430,7 @@ static PyObject* py_sparse_matrix_new(PyObject* self, PyObject* args){
     if (!PyArg_ParseTuple(args, "iii", &rows,&cols,&data_type)) return NULL;
     //printf("create %d\n",rows);
     //printf("create %d\n",cols);
-    smatrix_t * a = smatrix_new(rows, cols, data_type);
+    smatrix_t * a = bridge_manager.bridges[bridge_index].smatrix_new(rows, cols, data_type);
     //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_sparse_matrix_new", py_sparse_matrix_delete);
     //printf("capsule_new %p\n",po);
@@ -416,9 +451,9 @@ static PyObject* py_sparse_matrix_set(PyObject* self, PyObject* args) {
     smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
     //printf("smat %p\n",mat);
     if(mat->type == T_COMPLEX) {
-        smatrix_set_complex_value(mat,i,j,real, imag);
+        bridge_manager.bridges[bridge_index].smatrix_set_complex_value(mat,i,j,real, imag);
     } else if(mat->type == T_FLOAT) {
-        smatrix_set_real_value(mat,i,j,real);
+        bridge_manager.bridges[bridge_index].smatrix_set_real_value(mat,i,j,real);
     }
     Py_RETURN_NONE;
 }
@@ -431,9 +466,9 @@ static PyObject* py_sparse_matrix_pack(PyObject* self, PyObject* args) {
     //printf("pf %p\n",pf);
     smatrix_t * mat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
     if (mat->type == T_FLOAT) {
-        smatrix_pack(mat);
+        bridge_manager.bridges[bridge_index].smatrix_pack(mat);
     } else {
-        smatrix_pack_complex(mat);
+        bridge_manager.bridges[bridge_index].smatrix_pack_complex(mat);
     }
     Py_RETURN_NONE;
 }
@@ -444,7 +479,7 @@ static PyObject* py_move_sparse_matrix_device(PyObject* self, PyObject* args) {
     if(!PyArg_ParseTuple(args, "O:py_move_sparse_matrix_device", &pf)) return NULL;
 
     smatrix_t * smat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
-    smatreqdev(smat);
+    bridge_manager.bridges[bridge_index].smatreqdev(smat);
     Py_RETURN_NONE;
 }
 
@@ -454,14 +489,15 @@ static PyObject* py_move_sparse_matrix_host(PyObject* self, PyObject* args) {
     if(!PyArg_ParseTuple(args, "O:py_move_sparse_matrix_device", &pf)) return NULL;
 
     smatrix_t * smat = (smatrix_t *)PyCapsule_GetPointer(pf, "py_sparse_matrix_new");
-    smatreqhost(smat); //should use this function? It seems that it creates the object in the stack
+    bridge_manager.bridges[bridge_index].smatreqhost(smat); //should use this function? It seems that it creates the object in the stack
     //printf("mat %p\n",mat);
 //    int n = (mat->type==T_FLOAT?mat->nrow*mat->ncol:2*mat->nrow*mat->ncol);
 //    matrix_t * out = matrix_new(mat->nrow, mat->ncol, mat->type);
 //    cl_int status = clEnqueueReadBuffer(clinfo.q, mat->mem, CL_TRUE, 0, n * sizeof (double), out->value.f, 0, NULL, NULL);
 //    CLERR
-    PyObject* po = PyCapsule_New((void*)smat, "py_sparse_matrix_new", py_sparse_matrix_delete);
-    return po;
+//    PyObject* po = PyCapsule_New((void*)smat, "py_sparse_matrix_new", py_sparse_matrix_delete);
+//    return po;
+    Py_RETURN_NONE;
 }
 
 static PyObject* py_mat_add(PyObject* self, PyObject* args) {
@@ -482,7 +518,7 @@ static PyObject* py_mat_add(PyObject* self, PyObject* args) {
     //TODO completar o vec_add
     object_t ** in = convertMatMatToObject(mat_a,mat_b);
     
-    matrix_t * r = (matrix_t *) mat_add((void **) in, NULL );
+    matrix_t * r = (matrix_t *) mat_add(&bridge_manager, bridge_index, (void **) in, NULL );
     
 
     PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
@@ -499,7 +535,7 @@ static PyObject* py_scalar_mat_mul(PyObject* self, PyObject* args) {
     
     object_t ** in = convertScaMatToObject(scalar, mat_a);
     
-    matrix_t * r = (matrix_t *) mat_mulsc((void **) in, NULL );
+    matrix_t * r = (matrix_t *) mat_mulsc(&bridge_manager, bridge_index, (void **) in, NULL );
 
     PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
     return po;
@@ -517,7 +553,7 @@ static PyObject* py_scalar_vec_mul(PyObject* self, PyObject* args) {
     
     object_t ** in = convertScaVecToObject(scalar, vec_a);
     
-    vector_t * r = (vector_t *) vec_mulsc((void **) in, NULL );
+    vector_t * r = (vector_t *) vec_mulsc(&bridge_manager, bridge_index, (void **) in, NULL );
     //    printf("r %p\n",r);
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
@@ -534,9 +570,9 @@ static PyObject* py_complex_scalar_vec_mul(PyObject* self, PyObject* args) {
     
     vector_t * r = NULL;
     if (vec_a->type == T_FLOAT) {
-        r = (vector_t *) vec_mul_complex_scalar ( complex_scalar, vec_a); 
+        r = (vector_t *) vec_mul_complex_scalar (&bridge_manager, bridge_index,  complex_scalar, vec_a); 
     } else if (vec_a->type == T_COMPLEX) {
-        r = (vector_t *) mul_complex_scalar_complex_vec( complex_scalar, vec_a);
+        r = (vector_t *) mul_complex_scalar_complex_vec(&bridge_manager, bridge_index,  complex_scalar, vec_a);
     }
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
@@ -554,15 +590,43 @@ static PyObject* py_complex_scalar_mat_mul(PyObject* self, PyObject* args) {
     
     matrix_t * r = NULL;
     if (mat_a->type == T_FLOAT) {
-        r = (matrix_t *) mul_complex_scalar_float_mat ( complex_scalar, mat_a); 
+        r = (matrix_t *) mul_complex_scalar_float_mat (&bridge_manager, bridge_index,  complex_scalar, mat_a); 
     } else if (mat_a->type == T_COMPLEX) {
-        r = (matrix_t *) mul_complex_scalar_complex_mat( complex_scalar, mat_a);
+        r = (matrix_t *) mul_complex_scalar_complex_mat(&bridge_manager, bridge_index,  complex_scalar, mat_a);
     }
 
     PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
     return po;
 }
 
+static PyObject* cpu_constant;
+static PyObject* gpu_constant;
+static PyObject* float_constant;
+static PyObject* complex_constant;
+
+static PyObject* get_cpu_constant(PyObject* self, PyObject* args)
+{
+    Py_INCREF(cpu_constant);
+    return cpu_constant;
+}
+
+static PyObject* get_gpu_constant(PyObject* self, PyObject* args)
+{
+    Py_INCREF(gpu_constant);
+    return gpu_constant;
+}
+
+static PyObject* get_float_constant(PyObject* self, PyObject* args)
+{
+    Py_INCREF(float_constant);
+    return float_constant;
+}
+
+static PyObject* get_complex_constant(PyObject* self, PyObject* args)
+{
+    Py_INCREF(complex_constant);
+    return complex_constant;
+}
 
 static PyMethodDef mainMethods[] = {
     {"init_engine", py_init_engine, METH_VARARGS, "init_engine"},
@@ -595,6 +659,10 @@ static PyMethodDef mainMethods[] = {
     {"complex_scalar_vec_mul", py_complex_scalar_vec_mul, METH_VARARGS, "complex_scalar_vec_mul"},
     {"complex_scalar_mat_mul", py_complex_scalar_mat_mul, METH_VARARGS, "complex_scalar_mat_mul"},
     {"complex_new", py_complex_new, METH_VARARGS, "complex_new"},
+    {"get_cpu_constant", get_cpu_constant, METH_NOARGS, "Get the CPU constant value."},
+    {"get_gpu_constant", get_gpu_constant, METH_NOARGS, "Get the GPU constant value."},
+    {"get_float_constant", get_float_constant, METH_NOARGS, "Get the FLOAT constant value."},
+    {"get_complex_constant", get_complex_constant, METH_NOARGS, "Get COMPLEX the constant value."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -606,7 +674,17 @@ static PyModuleDef neblina = {
 };
 
 PyMODINIT_FUNC PyInit_neblina(void) {
-    return PyModule_Create(&neblina);
+    PyObject* module =  PyModule_Create(&neblina);
+    cpu_constant = PyLong_FromLong(0);
+    gpu_constant = PyLong_FromLong(1);
+    float_constant = PyLong_FromLong(2);
+    complex_constant = PyLong_FromLong(3);
+    
+    PyModule_AddObject(module, "CPU", cpu_constant);
+    PyModule_AddObject(module, "GPU", gpu_constant);
+    PyModule_AddObject(module, "FLOAT", float_constant);
+    PyModule_AddObject(module, "COMPLEX", complex_constant);
+    return module;
 }
 
 
