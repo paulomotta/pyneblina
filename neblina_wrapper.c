@@ -132,11 +132,11 @@ static PyObject* py_vector_get(PyObject* self, PyObject* args) {
     int n;
     if(!PyArg_ParseTuple(args, "Oi:py_vector_set", &pf, &n)) return NULL;
 
-    //printf("print %d\n",n);
-    //printf("pf %p\n",pf);
+    // printf("print %d\n",n);
+    // printf("pf %p\n",pf);
     vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
-    //printf("vec %p\n",vec);
-    //printf("%lf\n",vec->value.f[n]);
+    // printf("vec %p\n",vec);
+    // printf("%lf\n",vec->value.f[n]);
     PyObject * result = PyFloat_FromDouble((double)vec->value.f[n]);
     return result;
 }
@@ -525,6 +525,31 @@ static PyObject* py_mat_add(PyObject* self, PyObject* args) {
     return po;
 }
 
+static PyObject* py_mat_mul(PyObject* self, PyObject* args) {
+    
+    PyObject* a = NULL;
+    PyObject* b = NULL;
+    if(!PyArg_ParseTuple(args, "OO:py_mat_mul", &a, &b)) return NULL;
+
+    //printf("a %p\n",a);
+    //printf("b %p\n",b);
+    
+    matrix_t * mat_a = (matrix_t *)PyCapsule_GetPointer(a, "py_matrix_new");
+        //printf("vec_a %p\n",vec_a);
+    matrix_t * mat_b = (matrix_t *)PyCapsule_GetPointer(b, "py_matrix_new");
+        //printf("vec_b %p\n",vec_b);
+
+    
+    //TODO completar o vec_add
+    object_t ** in = convertMatMatToObject(mat_a,mat_b);
+    
+    matrix_t * r = (matrix_t *) mat_mul(&bridge_manager, bridge_index, (void **) in, NULL );
+    
+
+    PyObject* po = PyCapsule_New((void*)r, "py_matrix_new", py_matrix_delete);
+    return po;
+}
+
 static PyObject* py_scalar_mat_mul(PyObject* self, PyObject* args) {
     
     PyObject* a = NULL;
@@ -654,6 +679,7 @@ static PyMethodDef mainMethods[] = {
     {"vec_sum", py_vec_sum, METH_VARARGS, "vec_sum"},
     {"vec_conj", py_vec_conj, METH_VARARGS, "vec_conj"},
     {"mat_add", py_mat_add, METH_VARARGS, "mat_add"},
+    {"mat_mul", py_mat_mul, METH_VARARGS, "mat_mul"},
     {"scalar_mat_mul", py_scalar_mat_mul, METH_VARARGS, "scalar_mat_mul"},
     {"scalar_vec_mul", py_scalar_vec_mul, METH_VARARGS, "scalar_vec_mul"},
     {"complex_scalar_vec_mul", py_complex_scalar_vec_mul, METH_VARARGS, "complex_scalar_vec_mul"},
