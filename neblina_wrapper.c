@@ -97,7 +97,7 @@ static PyObject* py_vector_new(PyObject* self, PyObject* args){
     int data_type;
     if (!PyArg_ParseTuple(args, "ii", &len,&data_type)) return NULL;
     //printf("create %d\n",len);
-    vector_t * a = bridge_manager.bridges[bridge_index].vector_new(len, data_type);
+    vector_t * a = bridge_manager.bridges[bridge_index].vector_new(len, data_type, 1);
     //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_vector_new", py_vector_delete);
     //printf("capsule_new %p\n",po);
@@ -334,7 +334,7 @@ static PyObject* py_matrix_new(PyObject* self, PyObject* args){
     if (!PyArg_ParseTuple(args, "iii", &rows,&cols,&data_type)) return NULL;
     //printf("create %d\n",rows);
     //printf("create %d\n",cols);
-    matrix_t * a = bridge_manager.bridges[bridge_index].matrix_new(rows, cols, data_type);
+    matrix_t * a = bridge_manager.bridges[bridge_index].matrix_new(rows, cols, data_type, 1);
     //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_matrix_new", py_matrix_delete);
     //printf("capsule_new %p\n",po);
