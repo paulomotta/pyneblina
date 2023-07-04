@@ -6,9 +6,6 @@ import pytest
 
 from neblina import *
 
-float_ = 2
-complex_ = 3
-
 def current_milli_time():
     return round(time.time() * 1000)
 
@@ -16,8 +13,8 @@ def test_vec_add():
     print("test_vec_add")
 
     n = 3
-    vec_f = vector_new(n, float_)
-    vec_2 = vector_new(n, float_)
+    vec_f = vector_new(n, FLOAT)
+    vec_2 = vector_new(n, FLOAT)
 
     for i in range(n):
         vector_set(vec_f, i,
@@ -39,8 +36,8 @@ def test_vec_add_complex():
     print("test_vec_add_complex")
 
     n = 3
-    vec_f = vector_new(n, complex_)
-    vec_2 = vector_new(n, complex_)
+    vec_f = vector_new(n, COMPLEX)
+    vec_2 = vector_new(n, COMPLEX)
 
     for i in range(n):
         vector_set(vec_f, i, 2*i, 3*i)
@@ -60,8 +57,8 @@ def test_mat_add():
     print("test_mat_add")
 
     n = 3
-    mat_a = matrix_new(n, n, float_)
-    mat_b = matrix_new(n, n, float_)
+    mat_a = matrix_new(n, n, FLOAT)
+    mat_b = matrix_new(n, n, FLOAT)
 
     for i in range(n):
         for j in range(n):
@@ -83,8 +80,8 @@ def test_scalar_mat_mul():
     print("test_scalar_mat_mul")
 
     n = 3
-    scalar = 2;
-    mat_a = matrix_new(n, n, float_)
+    scalar = 2
+    mat_a = matrix_new(n, n, FLOAT)
 
     for i in range(n):
         for j in range(n):
@@ -104,8 +101,8 @@ def test_scalar_vec_mul():
     print("test_scalar_vec_mul")
 
     n = 3
-    scalar = 2;
-    vec_a = vector_new(n, float_)
+    scalar = 2
+    vec_a = vector_new(n, FLOAT)
 
     for i in range(n):
         vector_set(vec_a, i, 2.0, 0.0)
@@ -124,11 +121,11 @@ def test_vector_matrix_multiplication():
     print("test_vector_matrix_multiplication")
 
     n = 3
-    vec_f = vector_new(n, float_)
+    vec_f = vector_new(n, FLOAT)
     for i in range(n):
         vector_set(vec_f, i, 1.0, 0.0)
 
-    mat_f = matrix_new(n, n, float_)
+    mat_f = matrix_new(n, n, FLOAT)
 
     for i in range(n):
         for j in range(n):
@@ -150,11 +147,11 @@ def test_vector_matrix_multiplication_complex():
     print("test_vector_matrix_multiplication_complex")
     
     n = 7000
-    vec_f = vector_new(n, complex_)
+    vec_f = vector_new(n, COMPLEX)
     for i in range(n):
         vector_set(vec_f, i, 2.0, 2.0)
 
-    mat_f = matrix_new(n, n, complex_)
+    mat_f = matrix_new(n, n, COMPLEX)
 
     for i in range(n):
         for j in range(n):
@@ -188,11 +185,11 @@ def test_vector_sparse_matrix_multiplication():
     print("test_vector_sparse_matrix_multiplication")
 
     n = 10
-    vec_f = vector_new(n, float_)
+    vec_f = vector_new(n, FLOAT)
     for i in range(n):
         vector_set(vec_f, i, 3.0, 0.0)
 
-    smat_f = sparse_matrix_new(n, n, float_)
+    smat_f = sparse_matrix_new(n, n, FLOAT)
 
     sparse_matrix_set(smat_f, 0, 0, 3., 0.0)
     sparse_matrix_set(smat_f, 0, 1, 3., 0.0)
@@ -228,11 +225,11 @@ def test_vector_sparse_matrix_multiplication_complex():
     print("test_vector_sparse_matrix_multiplication_complex")
 
     n = 10
-    vec_f = vector_new(n, complex_)
+    vec_f = vector_new(n, COMPLEX)
     for i in range(n):
         vector_set(vec_f, i, 3.0, 3.0)
 
-    smat_f = sparse_matrix_new(n, n, complex_)
+    smat_f = sparse_matrix_new(n, n, COMPLEX)
 
     sparse_matrix_set(smat_f, 0, 0, 3., 3.0)
     sparse_matrix_set(smat_f, 0, 1, 3., 3.0)
@@ -267,7 +264,7 @@ def test_vector_sparse_matrix_multiplication_complex():
 def test_vec_conjugate():
     print("test_vec_conjugate")
     n = 3
-    v1 = vector_new(n, complex_)
+    v1 = vector_new(n, COMPLEX)
 
     for i in range(n):
         vector_set(v1, i, 2.0, 2.0)
@@ -284,7 +281,7 @@ def test_vec_conjugate():
 def test_vec_sum():
     print("test_vec_sum")
     n = 4
-    v1 = vector_new(n, float_)
+    v1 = vector_new(n, FLOAT)
 
     for i in range(n):
         vector_set(v1, i, 2.0, 0.0)
@@ -301,7 +298,7 @@ def test_vec_add_off():
     print("test_vec_add_off")
 
     n = 4
-    v1 = vector_new(n, float_)
+    v1 = vector_new(n, FLOAT)
 
     for i in range(n):
         vector_set(v1, i, 2.0, 0.0)
@@ -322,8 +319,8 @@ def test_vec_prod():
     print("test_vec_prod")
 
     n = 3
-    v1 = vector_new(n, float_)
-    v2 = vector_new(n, float_)
+    v1 = vector_new(n, FLOAT)
+    v2 = vector_new(n, FLOAT)
 
     for i in range(n):
         vector_set(v1, i, 1.0, 0.0)
@@ -345,8 +342,8 @@ def test_vec_prod():
 def test_vec_prod_complex():
     print("test_vec_prod_complex")
     n = 3
-    v1 = vector_new(n, complex_)
-    v2 = vector_new(n, complex_)
+    v1 = vector_new(n, COMPLEX)
+    v2 = vector_new(n, COMPLEX)
 
     for i in range(n):
         vector_set(v1, i, 1.0, 2.0)
@@ -365,16 +362,16 @@ def test_vec_prod_complex():
 
 def test_complex_scalar_new():
     print("test_complex_scalar_new")
-    scalar = complex_new(2,2);
+    scalar = complex_new(2,2)
     
 
 def test_complex_scalar_mat_mul():
     print("test_complex_scalar_mat_mul")
 
     n = 3
-    scalar = complex_new(2,2);
-    mat_a = matrix_new(n, n, float_)
-    mat_b = matrix_new(n, n, complex_)
+    scalar = complex_new(2,2)
+    mat_a = matrix_new(n, n, FLOAT)
+    mat_b = matrix_new(n, n, COMPLEX)
 
     for i in range(n):
         for j in range(n):
@@ -404,9 +401,9 @@ def test_complex_scalar_vec_mul():
     print("test_complex_scalar_vec_mul")
 
     n = 3
-    scalar = complex_new(2,2);
+    scalar = complex_new(2,2)
     vec_a = vector_new(n, FLOAT)
-    vec_b = vector_new(n, complex_)
+    vec_b = vector_new(n, COMPLEX)
 
     for i in range(n):
         vector_set(vec_a, i, 2.0, 0.0)
@@ -435,8 +432,8 @@ def test_mat_mul():
 
     n = 3
 
-    mat_a = matrix_new(n, n, float_)
-    mat_b = matrix_new(n, n, float_)
+    mat_a = matrix_new(n, n, FLOAT)
+    mat_b = matrix_new(n, n, FLOAT)
 
     for i in range(n):
         for j in range(n):
@@ -459,8 +456,8 @@ def test_mat_mul_withComplex():
 
     n = 2
 
-    mat_a = matrix_new(n, n, complex_)
-    mat_b = matrix_new(n, n, complex_)
+    mat_a = matrix_new(n, n, COMPLEX)
+    mat_b = matrix_new(n, n, COMPLEX)
 
     matrix_set(mat_a, 0, 0, 17., 1.0)
     matrix_set(mat_b, 0, 0, 60., 0.0)
@@ -513,7 +510,7 @@ def test_mat_mul_withComplex():
     assert   27. == matrix_get(res,2,2)
     assert  -10. == matrix_get(res,2,3)
 
-init_engine(GPU,0)
+init_engine(CPU,0)
 
 test_vec_add()
 test_vec_add_complex()
