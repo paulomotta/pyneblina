@@ -43,7 +43,7 @@ static PyObject* py_init_engine(PyObject* self, PyObject* args){
     }
     load_plugin(&bridge_manager, lib_name, bridge_index);
     bridge_manager.bridges[bridge_index].InitEngine_f(device);
-    printf("3\n");
+    // printf("3\n");
     Py_RETURN_NONE;
 }
 
