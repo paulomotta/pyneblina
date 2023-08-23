@@ -1,4 +1,5 @@
 #include "Python.h"
+#include <numpy/arrayobject.h>
 #include "neblina.h"
 #include "neblina_std.h"
 #include "neblina_vector.h"
@@ -97,10 +98,44 @@ static PyObject* py_vector_new(PyObject* self, PyObject* args){
     int data_type;
     if (!PyArg_ParseTuple(args, "ii", &len,&data_type)) return NULL;
     //printf("create %d\n",len);
-    vector_t * a = bridge_manager.bridges[bridge_index].vector_new(len, data_type, 1);
+    vector_t * a = bridge_manager.bridges[bridge_index].vector_new(len, data_type, 1, NULL);
     //printf("malloc %p\n",a);
     PyObject* po = PyCapsule_New((void*)a, "py_vector_new", py_vector_delete);
     //printf("capsule_new %p\n",po);
+    return po;
+}
+
+static PyObject* py_load_numpy_array(PyObject* self, PyObject* args){
+    PyObject* a = NULL;
+
+    int i = 1;
+    if(!PyArg_ParseTuple(args, "O:py_load_numpy_array", &a)) return NULL;
+
+    float* dataArrayA = (float*)PyArray_DATA((PyArrayObject*)a);
+    // printf("%p\n",dataArrayA);
+    // printf("%d\n",i++);
+
+    npy_intp* shape = PyArray_DIMS((PyArrayObject*)a);
+    // printf("%d\n",i++);
+
+    int rows = shape[0];
+    int cols = shape[1];
+    int len = shape[0];
+    PyArray_Descr* dtype = PyArray_DESCR(a);
+    char typekind = dtype->kind;  // 'i' for signed integer, 'f' for float, etc.
+    int itemsize = dtype->elsize; // Size of each element in bytes
+    //printf("Data Type: %c, Item Size: %d\n", typekind, itemsize);
+
+    int data_type = (dtype->kind == 'f' ? T_FLOAT : T_COMPLEX);
+    // printf("%d\n",i++);
+
+    vector_t * vec_a = bridge_manager.bridges[bridge_index].vector_new(len, data_type, 0, dataArrayA);
+    // printf("%d\n",i++);
+
+    // printf("%p\n",vec_a->value.f);
+
+    PyObject* po = PyCapsule_New((void*)vec_a, "py_vector_new", py_vector_delete);
+
     return po;
 }
 
@@ -193,6 +228,19 @@ static PyObject* py_vec_add(PyObject* self, PyObject* args) {
     //printf("vec add to call\n");
     vector_t * r = (vector_t *) vec_add(&bridge_manager, bridge_index, (void **) in, NULL );
     
+    //TODO this part returns a numpy_array (not working yet)
+    // PyObject* outputArray = PyArray_SimpleNew(2, shape, data_type);
+    // printf("%d\n",i++);
+
+    // float* outputData = (float*)PyArray_DATA((PyArrayObject*)outputArray);
+    // printf("%d\n",i++);
+
+    // printf("%p %p\n",outputData,r->value.f);
+    // for (int i=0; i < r->len; i++) {
+    //     printf("%d %f\n",i,r->value.f[i]);
+    // }
+    // memcpy(outputData, r->value.f, r->len);
+    // printf("%d\n",i++);
 
     PyObject* po = PyCapsule_New((void*)r, "py_vector_new", py_vector_delete);
     return po;
@@ -657,6 +705,7 @@ static PyMethodDef mainMethods[] = {
     {"init_engine", py_init_engine, METH_VARARGS, "init_engine"},
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
     {"vector_new", py_vector_new, METH_VARARGS, "vector_new"},
+    {"load_numpy_array", py_load_numpy_array, METH_VARARGS, "load_numpy_array"},
     {"vector_set", py_vector_set, METH_VARARGS, "vector_set"},
     {"vector_get", py_vector_get, METH_VARARGS, "vector_get"},
     {"move_vector_device", py_move_vector_device, METH_VARARGS, "move_vector_device"},
@@ -710,6 +759,8 @@ PyMODINIT_FUNC PyInit_neblina(void) {
     PyModule_AddObject(module, "GPU", gpu_constant);
     PyModule_AddObject(module, "FLOAT", float_constant);
     PyModule_AddObject(module, "COMPLEX", complex_constant);
+
+    import_array();
     return module;
 }
 
