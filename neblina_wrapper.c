@@ -120,6 +120,7 @@ static PyObject* py_load_numpy_array(PyObject* self, PyObject* args){
 
     int rows = shape[0];
     int cols = shape[1];
+    // printf("rows=%d cols=%d sizeof(double)=%ld\n",rows, cols, sizeof(double));
     int len = shape[0];
     PyArray_Descr* dtype = PyArray_DESCR(a);
     char typekind = dtype->kind;  // 'i' for signed integer, 'f' for float, etc.
@@ -137,6 +138,40 @@ static PyObject* py_load_numpy_array(PyObject* self, PyObject* args){
     PyObject* po = PyCapsule_New((void*)vec_a, "py_vector_new", py_vector_delete);
 
     return po;
+}
+
+static PyObject* py_retrieve_numpy_array(PyObject* self, PyObject* args){
+    
+    PyObject* pf = NULL;
+
+    if(!PyArg_ParseTuple(args, "O:py_retrieve_numpy_array", &pf)) return NULL;
+
+    // printf("pf %p\n",pf);
+    vector_t * vec = (vector_t *)PyCapsule_GetPointer(pf, "py_vector_new");
+    // printf("vec %p\n",vec);
+    // printf("%p\n",vec->value.f);
+    bridge_manager.bridges[bridge_index].vecreqhost(vec);
+    vec->externalData = 1; //to make sure it will not be deallocated
+
+    // for (int i=0; i < vec->len; i++){
+    //     printf("%d %lf\n", i, vec->value.f[i]);
+    // }
+    int rows = vec->len;
+    npy_intp dims[1] = {rows};  // Array dimensions
+    int data_type = (vec->type == T_FLOAT ? NPY_FLOAT64 : NPY_COMPLEX128);
+
+    PyObject* numpyArray = PyArray_SimpleNewFromData(1, dims, data_type, vec->value.f);
+
+    // double* outputData = (double*)PyArray_DATA((PyArrayObject*)numpyArray);
+
+    // for (int i=0; i < dims[0]; i++) {
+    //     printf("%d %f\n",i,outputData[i]);
+    // }
+
+    // Make sure to set flags to the NumPy array to manage memory correctly
+    PyArray_ENABLEFLAGS((PyArrayObject*)numpyArray, NPY_ARRAY_OWNDATA);
+    
+    return numpyArray;
 }
 
 static PyObject* py_vector_set(PyObject* self, PyObject* args) {
@@ -706,6 +741,7 @@ static PyMethodDef mainMethods[] = {
     {"stop_engine", py_stop_engine, METH_VARARGS, "stop_engine"},
     {"vector_new", py_vector_new, METH_VARARGS, "vector_new"},
     {"load_numpy_array", py_load_numpy_array, METH_VARARGS, "load_numpy_array"},
+    {"retrieve_numpy_array", py_retrieve_numpy_array, METH_VARARGS, "retrieve_numpy_array"},
     {"vector_set", py_vector_set, METH_VARARGS, "vector_set"},
     {"vector_get", py_vector_get, METH_VARARGS, "vector_get"},
     {"move_vector_device", py_move_vector_device, METH_VARARGS, "move_vector_device"},
