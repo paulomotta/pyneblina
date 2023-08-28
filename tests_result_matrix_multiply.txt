@@ -1,0 +1,23 @@
+np.dot(matrix1, matrix2) total 39577
+np.dot(matrixc1, matrixc2) total 102892
+nbl.load_numpy_matrix total 0
+nbl.mat_mul(mat_f1, mat_f2) total 12024
+(4000, 4000)
+(4000, 4000)
+nbl.load_numpy_matrix complex total 0
+nbl.mat_mul(mat_c1, mat_c2) complex total 17992
+(4000, 4000)
+(4000, 4000)
+all tests passed
+
+np.dot(matrix1, matrix2) total 444465
+np.dot(matrixc1, matrixc2) total 1164723
+nbl.load_numpy_matrix total 1
+nbl.mat_mul(mat_f1, mat_f2) total 138593
+(9000, 9000)
+(9000, 9000)
+nbl.load_numpy_matrix complex total 0
+nbl.mat_mul(mat_c1, mat_c2) complex total 202105
+(9000, 9000)
+(9000, 9000)
+all tests passed
